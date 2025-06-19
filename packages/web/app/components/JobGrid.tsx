@@ -5,6 +5,7 @@ import JobCard from './JobCard';
 import LoadingSpinner from './LoadingSpinner';
 import Pagination from './Pagination';
 import { Job } from '../types';
+import axios from 'axios';
 
 export default function JobGrid() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -29,13 +30,13 @@ export default function JobGrid() {
       params.set('page', page.toString());
       params.set('limit', '15');
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/jobs?${params.toString()}`);
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/jobs?${params.toString()}`);
       
-      if (!response.ok) {
+      if (response.status !==200) {
         throw new Error('Failed to fetch jobs');
       }
 
-      const data = await response.json();
+      const data = response.data;
       setJobs(data.jobs || []);
       setPagination(data.pagination || {
         currentPage: 1,

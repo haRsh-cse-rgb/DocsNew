@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Job } from '../types';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 interface CVAnalysisModalProps {
   isOpen: boolean;
@@ -75,46 +76,26 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
       setUploading(true);
 
       // Step 1: Get pre-signed URL
-      const urlResponse = await fetch('/api/s3/pre-signed-url?fileType=' + encodeURIComponent(file.type));
-      if (!urlResponse.ok) {
-        throw new Error('Failed to get upload URL');
-      }
-
-      const { uploadUrl, key } = await urlResponse.json();
+      const urlResponse = await axios.get('/api/s3/pre-signed-url?fileType=' + encodeURIComponent(file.type));
+      const { uploadUrl, key } = urlResponse.data;
 
       // Step 2: Upload file to S3
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: file,
+      await axios.put(uploadUrl, file, {
         headers: {
           'Content-Type': file.type,
         },
       });
 
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file');
-      }
-
       setUploading(false);
       setAnalyzing(true);
 
       // Step 3: Analyze CV
-      const analysisResponse = await fetch('/api/ai/analyze-cv', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jobId: job.jobId,
-          cvS3Key: key,
-        }),
+      const analysisResponse = await axios.post('/api/ai/analyze-cv', {
+        jobId: job.jobId,
+        cvS3Key: key,
       });
 
-      if (!analysisResponse.ok) {
-        throw new Error('Failed to analyze CV');
-      }
-
-      const analysisData = await analysisResponse.json();
+      const analysisData = analysisResponse.data;
       setAnalysis(analysisData.analysis);
       setSuggestedJobs(analysisData.suggestedJobs || []);
 

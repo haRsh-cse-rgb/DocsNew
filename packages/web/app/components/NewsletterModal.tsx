@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 interface NewsletterModalProps {
   isOpen: boolean;
@@ -51,20 +52,10 @@ export default function NewsletterModal({ isOpen, onClose }: NewsletterModalProp
     try {
       setLoading(true);
 
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          categories: selectedCategories,
-        }),
+      const response = await axios.post('/api/subscribe', {
+        email,
+        categories: selectedCategories,
       });
-
-      if (!response.ok) {
-        throw new Error('Subscription failed');
-      }
 
       toast.success('Successfully subscribed to job alerts!');
       setEmail('');

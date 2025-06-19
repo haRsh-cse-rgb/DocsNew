@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import JobDetailClient from './JobDetailClient';
+import axios from 'axios';
 
 interface Props {
   params: { id: string };
@@ -8,15 +9,8 @@ interface Props {
 
 async function getJob(id: string) {
   try {
-    const response = await fetch(`${process.env.API_BASE_URL || 'http://localhost:5000/api/v1'}/jobs/${id}`, {
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    return await response.json();
+    const response = await axios.get(`${process.env.API_BASE_URL || 'http://localhost:5000/api/v1'}/jobs/${id}`);
+    return response.data;
   } catch (error) {
     console.error('Error fetching job:', error);
     return null;

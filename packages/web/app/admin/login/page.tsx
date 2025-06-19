@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LockClosedIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -22,19 +23,7 @@ export default function AdminLogin() {
     try {
       setLoading(true);
 
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
+      const { data } = await axios.post('/api/admin/login', { email, password });
 
       // Store token in localStorage (in production, use httpOnly cookies)
       localStorage.setItem('adminToken', data.token);

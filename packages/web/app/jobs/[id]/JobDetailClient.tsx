@@ -9,7 +9,7 @@ import {
   CurrencyDollarIcon, 
   CalendarIcon,
   SparklesIcon,
-  ExternalLinkIcon,
+  ArrowTopRightOnSquareIcon,
   ShareIcon,
   BookmarkIcon
 } from '@heroicons/react/24/outline';
@@ -132,7 +132,7 @@ export default function JobDetailClient({ job }: JobDetailClientProps) {
                     className="btn-primary flex items-center justify-center space-x-2 flex-1"
                   >
                     <span>Apply Now</span>
-                    <ExternalLinkIcon className="h-5 w-5" />
+                    <ArrowTopRightOnSquareIcon className="h-5 w-5" />
                   </a>
                   
                   <button

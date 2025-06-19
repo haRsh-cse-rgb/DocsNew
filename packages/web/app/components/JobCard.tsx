@@ -8,7 +8,7 @@ import {
   CurrencyDollarIcon, 
   CalendarIcon,
   SparklesIcon,
-  ExternalLinkIcon 
+  ArrowTopRightOnSquareIcon 
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 import { Job } from '../types';
@@ -123,7 +123,7 @@ export default function JobCard({ job }: JobCardProps) {
                 className="btn-primary flex items-center justify-center space-x-2 flex-1"
               >
                 <span>Apply Now</span>
-                <ExternalLinkIcon className="h-4 w-4" />
+                <ArrowTopRightOnSquareIcon className="h-4 w-4" />
               </Link>
               
               <button
