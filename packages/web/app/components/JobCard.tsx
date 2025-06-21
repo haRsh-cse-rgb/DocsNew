@@ -12,7 +12,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 import { Job } from '../types';
-import CVAnalysisModal from './CVAnalysisModal';
 
 interface JobCardProps {
   job: Job;
@@ -117,24 +116,6 @@ export default function JobCard({ job }: JobCardProps) {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                href={job.originalLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary flex items-center justify-center space-x-2 flex-1"
-              >
-                <span>Apply Now</span>
-                <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-              </Link>
-              
-              <button
-                onClick={() => setShowCVAnalysis(true)}
-                className="btn-outline flex items-center justify-center space-x-2 flex-1"
-              >
-                <SparklesIcon className="h-4 w-4" />
-                <span>Analyze CV</span>
-              </button>
-              
-              <Link
                 href={`/jobs/${job.jobId}`}
                 className="btn-secondary flex items-center justify-center flex-1"
               >
@@ -144,12 +125,6 @@ export default function JobCard({ job }: JobCardProps) {
           </div>
         </div>
       </div>
-
-      <CVAnalysisModal
-        isOpen={showCVAnalysis}
-        onClose={() => setShowCVAnalysis(false)}
-        job={job}
-      />
     </>
   );
 }

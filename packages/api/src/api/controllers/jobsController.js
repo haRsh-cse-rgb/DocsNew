@@ -89,7 +89,7 @@ const jobsController = {
       };
 
       // Cache for 5 minutes
-      await redisClient.setex(cacheKey, 300, JSON.stringify(response));
+      await redisClient.setEx(cacheKey, 300, JSON.stringify(response));
 
       res.json(response);
     } catch (error) {
@@ -127,8 +127,8 @@ const jobsController = {
 
       const job = result.Items[0];
 
-      // Cache for 10 minutes
-      await redisClient.setex(cacheKey, 600, JSON.stringify(job));
+      // Cache for 10 minutes (600 seconds)
+      await redisClient.setEx(cacheKey, 600, JSON.stringify(job));
 
       res.json(job);
     } catch (error) {

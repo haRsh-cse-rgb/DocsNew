@@ -10,7 +10,8 @@ const s3Controller = {
       const { fileType = 'application/pdf' } = req.query;
       
       // Generate unique key for the file
-      const key = `cvs/${uuidv4()}-${Date.now()}`;
+      const ext = fileType === 'application/pdf' ? '.pdf' : '';
+      const key = `cvs/${uuidv4()}-${Date.now()}${ext}`;
       
       const command = new PutObjectCommand({
         Bucket: process.env.S3_BUCKET_NAME,
@@ -30,8 +31,8 @@ const s3Controller = {
         expiresIn: 300
       });
     } catch (error) {
-      console.error('Error generating pre-signed URL:', error);
-      res.status(500).json({ error: 'Failed to generate upload URL' });
+      console.error('Gemini API error:', error.response?.data || error.message);
+      throw error;
     }
   }
 };

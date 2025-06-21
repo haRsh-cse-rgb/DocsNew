@@ -2,6 +2,7 @@ const axios = require('axios');
 const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, ScanCommand } = require('@aws-sdk/lib-dynamodb');
+const pdfParse = require('pdf-parse');
 
 const s3Client = new S3Client({ region: process.env.AWS_REGION });
 const dynamoClient = new DynamoDBClient({ region: process.env.AWS_REGION });
@@ -14,6 +15,11 @@ const aiController = {
 
       if (!jobId || !cvS3Key) {
         return res.status(400).json({ error: 'jobId and cvS3Key are required' });
+      }
+
+      // Only allow PDF files
+      if (!cvS3Key.toLowerCase().endsWith('.pdf')) {
+        return res.status(400).json({ error: 'Only PDF files are supported for CV analysis.' });
       }
 
       // Fetch job details from DynamoDB
@@ -43,19 +49,32 @@ const aiController = {
       const s3Command = new GetObjectCommand(s3Params);
       const s3Result = await s3Client.send(s3Command);
       
-      // Convert stream to string (assuming text CV)
-      const cvContent = await streamToString(s3Result.Body);
+      // Extract text from PDF using pdf-parse
+      const pdfBuffer = await streamToBuffer(s3Result.Body);
+      const pdfData = await pdfParse(pdfBuffer);
+      const cvContent = pdfData.text;
+
+      console.log(cvContent);
+      console.log(job);
+      console.log(cvS3Key);
 
       // Prepare prompt for Gemini API
       const prompt = `
-        Analyze the following CV against this job description and provide a structured response:
+        You are an expert resume reviewer. Your job is to strictly analyze only CVs/resumes. If the uploaded document is not a CV or resume (for example, if it is a cover letter, application letter, or any other document), do NOT produce any analysis or score. Instead, return this JSON:
+        { "error": "Please upload a CV or resume, not other document." }
+
+        If the document is a CV/resume, analyze it against the following job description and provide a STRICT, realistic, and critical review. Do not give high scores easily. Only give high compatibility if the CV is truly an excellent match. Provide detailed, actionable, and honest suggestions for improvement.
+
+        For each area to improve, if a specific line or bullet point in the CV needs improvement, quote the original line as 'originalLine' and provide a rewritten improved version as 'improvedLine'. If the improvement is not line-specific, provide a clear and actionable suggestion as a string.
+
+        For the 'improvements' array, do not be generic. Give very specific, actionable suggestions tailored to the actual content of the uploaded CV. Reference the actual lines or sections that need improvement and explain exactly what to change or add.
 
         JOB DETAILS:
         Role: ${job.role}
         Company: ${job.companyName}
         Location: ${job.location}
         Job Description: ${job.jobDescription}
-        Required Skills/Tags: ${job.tags ? job.tags.join(', ') : 'Not specified'}
+        Required Skills/Tags: ${Array.isArray(job.tags) ? job.tags.join(', ') : typeof job.tags === 'string' ? job.tags : 'Not specified'}
 
         CV CONTENT:
         ${cvContent}
@@ -63,9 +82,9 @@ const aiController = {
         Please provide a JSON response with the following structure:
         {
           "compatibilityScore": <number between 0-100>,
-          "strengths": [<array of 3-5 key strengths that match the job>],
-          "weaknesses": [<array of 2-4 areas that need improvement>],
-          "improvements": [<array of 3-5 specific suggestions for improvement>],
+          "strengths": [<array of key strengths that match the job>],
+          "weaknesses": [<array of objects, each with 'originalLine' and 'improvedLine' properties, or a string if not line-specific>],
+          "improvements": [<array of specific, actionable suggestions tailored to this CV>],
           "matchingSkills": [<array of skills from CV that match job requirements>],
           "missingSkills": [<array of important skills missing from CV>]
         }
@@ -102,13 +121,23 @@ async function streamToString(stream) {
   return Buffer.concat(chunks).toString('utf-8');
 }
 
+// Helper function to convert stream to buffer
+async function streamToBuffer(stream) {
+  const chunks = [];
+  for await (const chunk of stream) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
 // Mock Gemini API call (replace with actual implementation)
 async function callGeminiAPI(prompt) {
   try {
     // This is a mock response - replace with actual Gemini API call
     if (process.env.GEMINI_API_KEY) {
+      console.log('Attempting to call Gemini API...');
       const response = await axios.post(
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
         {
           contents: [{
             parts: [{ text: prompt }]
@@ -118,14 +147,19 @@ async function callGeminiAPI(prompt) {
           headers: {
             'Content-Type': 'application/json',
             'x-goog-api-key': process.env.GEMINI_API_KEY
-          }
+          },
+          timeout: 30000 // 30 second timeout
         }
       );
 
+      console.log('Gemini API response received');
       // Parse the response and extract JSON
-      const generatedText = response.data.candidates[0].content.parts[0].text;
+      let generatedText = response.data.candidates[0].content.parts[0].text;
+      // Remove Markdown code block if present
+      generatedText = generatedText.replace(/```json|```/g, '').trim();
       return JSON.parse(generatedText);
     } else {
+      console.log('No GEMINI_API_KEY found, using mock response');
       // Mock response for development
       return {
         compatibilityScore: Math.floor(Math.random() * 40) + 60, // 60-100
@@ -152,8 +186,35 @@ async function callGeminiAPI(prompt) {
       };
     }
   } catch (error) {
-    console.error('Gemini API error:', error);
-    throw error;
+    console.error('Gemini API error:', error.response?.data || error.message);
+    console.error('Error status:', error.response?.status);
+    console.error('Error details:', error.response?.data);
+    
+    // Fallback to mock response if API fails
+    console.log('Falling back to mock response due to API error');
+    return {
+      compatibilityScore: Math.floor(Math.random() * 40) + 60, // 60-100
+      strengths: [
+        "Strong technical background in relevant technologies",
+        "Good educational qualifications",
+        "Relevant work experience",
+        "Problem-solving skills demonstrated"
+      ],
+      weaknesses: [
+        "Limited experience with specific frameworks mentioned in job",
+        "Could improve communication skills section",
+        "Missing some industry certifications"
+      ],
+      improvements: [
+        "Add more specific project details and outcomes",
+        "Include relevant certifications or courses",
+        "Highlight leadership and teamwork experiences",
+        "Quantify achievements with numbers and metrics",
+        "Tailor skills section to match job requirements"
+      ],
+      matchingSkills: ["JavaScript", "React", "Node.js", "Problem Solving"],
+      missingSkills: ["AWS", "Docker", "Kubernetes", "CI/CD"]
+    };
   }
 }
 
@@ -177,7 +238,11 @@ async function getSuggestedJobs(matchingSkills, currentJobId) {
 
     // Score jobs based on skill matches
     const scoredJobs = result.Items.map(job => {
-      const jobTags = job.tags || [];
+      const jobTags = Array.isArray(job.tags)
+        ? job.tags
+        : typeof job.tags === 'string'
+          ? job.tags.split(',').map(tag => tag.trim())
+          : [];
       const matchCount = matchingSkills.filter(skill => 
         jobTags.some(tag => tag.toLowerCase().includes(skill.toLowerCase()))
       ).length;

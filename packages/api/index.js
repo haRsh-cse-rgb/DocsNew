@@ -24,6 +24,13 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+const analyzeCvLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 1, // limit each IP to 1 request per windowMs
+  message: 'One Cv Analysis per minute, please try again later after 1 minute'
+});
+app.use('/api/v1/ai/analyze-cv', analyzeCvLimiter);
+
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

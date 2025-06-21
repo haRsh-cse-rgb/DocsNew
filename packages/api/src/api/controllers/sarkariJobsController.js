@@ -55,7 +55,7 @@ const sarkariJobsController = {
         }
       };
 
-      await redisClient.setex(cacheKey, 300, JSON.stringify(response));
+      await redisClient.setEx(cacheKey, 300, JSON.stringify(response));
       res.json(response);
     } catch (error) {
       console.error('Error fetching sarkari jobs:', error);
@@ -87,7 +87,7 @@ const sarkariJobsController = {
 
       const sortedResults = result.Items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
       
-      await redisClient.setex(cacheKey, 300, JSON.stringify(sortedResults));
+      await redisClient.setEx(cacheKey, 300, JSON.stringify(sortedResults));
       res.json(sortedResults);
     } catch (error) {
       console.error('Error fetching sarkari results:', error);
@@ -121,7 +121,7 @@ const sarkariJobsController = {
       }
 
       const job = result.Items[0];
-      await redisClient.setex(cacheKey, 600, JSON.stringify(job));
+      await redisClient.setEx(cacheKey, 600, JSON.stringify(job));
       res.json(job);
     } catch (error) {
       console.error('Error fetching sarkari job:', error);

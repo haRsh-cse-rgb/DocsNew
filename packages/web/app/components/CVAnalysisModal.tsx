@@ -21,13 +21,23 @@ interface CVAnalysisModalProps {
   job: Job;
 }
 
+interface WeaknessObject {
+  originalLine: string;
+  improvedLine: string;
+}
+
+interface ImprovementObject {
+  suggestion: string;
+}
+
 interface AnalysisResult {
   compatibilityScore: number;
   strengths: string[];
-  weaknesses: string[];
-  improvements: string[];
+  weaknesses: (string | WeaknessObject)[];
+  improvements: (string | ImprovementObject)[];
   matchingSkills: string[];
   missingSkills: string[];
+  error?: string;
 }
 
 interface SuggestedJob {
@@ -50,9 +60,9 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       // Validate file type
-      const allowedTypes = ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const allowedTypes = ['application/pdf'];
       if (!allowedTypes.includes(selectedFile.type)) {
-        toast.error('Please upload a PDF, DOC, DOCX, or TXT file');
+        toast.error('Please upload a PDF file');
         return;
       }
 
@@ -102,7 +112,19 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
       toast.success('CV analysis completed!');
     } catch (error) {
       console.error('Analysis error:', error);
-      toast.error(error instanceof Error ? error.message : 'Analysis failed');
+      if (
+        axios.isAxiosError(error) &&
+        error.response &&
+        (typeof error.response.data === 'string' || error.response.data?.message)
+      ) {
+        toast.error(
+          typeof error.response.data === 'string'
+            ? error.response.data
+            : error.response.data.message
+        );
+      } else {
+        toast.error(error instanceof Error ? error.message : 'Analysis failed');
+      }
     } finally {
       setUploading(false);
       setAnalyzing(false);
@@ -121,7 +143,6 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
   };
 
   const handleClose = () => {
-    resetModal();
     onClose();
   };
 
@@ -178,7 +199,7 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".pdf,.doc,.docx,.txt"
+                    accept=".pdf"
                     onChange={handleFileSelect}
                     className="hidden"
                   />
@@ -204,7 +225,7 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
                         Choose File
                       </button>
                       <p className="mt-2 text-xs text-gray-500">
-                        Supports PDF, DOC, DOCX, TXT (max 5MB)
+                        Supports PDF (max 5MB)
                       </p>
                     </div>
                   )}
@@ -235,6 +256,18 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
                     </div>
                   </div>
                 )}
+              </div>
+            ) : analysis.error ? (
+              <div className="text-center text-red-600 font-semibold py-8">
+                {analysis.error}
+                <div className="mt-6">
+                  <button
+                    onClick={resetModal}
+                    className="btn-secondary"
+                  >
+                    Analyze Another CV
+                  </button>
+                </div>
               </div>
             ) : (
               /* Analysis Results */
@@ -281,7 +314,18 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
                       {analysis.weaknesses.map((weakness, index) => (
                         <li key={index} className="text-sm text-gray-700 flex items-start space-x-2">
                           <span className="w-1.5 h-1.5 bg-warning-600 rounded-full mt-2 flex-shrink-0"></span>
-                          <span>{weakness}</span>
+                          <span>
+                            {typeof weakness === 'string'
+                              ? weakness
+                              : weakness.originalLine && weakness.improvedLine
+                                ? <>
+                                    <span className="font-semibold">Original:</span> {weakness.originalLine}<br/>
+                                    <span className="font-semibold">Improved:</span> {weakness.improvedLine}
+                                  </>
+                                : typeof (weakness as any).suggestion === 'string'
+                                  ? (weakness as any).suggestion
+                                  : JSON.stringify(weakness)}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -298,7 +342,7 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
                     {analysis.improvements.map((improvement, index) => (
                       <li key={index} className="text-sm text-gray-700 flex items-start space-x-2">
                         <span className="w-1.5 h-1.5 bg-primary-600 rounded-full mt-2 flex-shrink-0"></span>
-                        <span>{improvement}</span>
+                        <span>{typeof improvement === 'string' ? improvement : improvement.suggestion || JSON.stringify(improvement)}</span>
                       </li>
                     ))}
                   </ul>
