@@ -13,6 +13,7 @@ export interface Job {
   tags?: string[];
   batch?: string[];
   status: 'active' | 'expired';
+  experience?: string;
 }
 
 export interface SarkariJob {

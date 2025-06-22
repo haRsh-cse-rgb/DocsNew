@@ -8,7 +8,8 @@ import {
   CurrencyDollarIcon, 
   CalendarIcon,
   SparklesIcon,
-  ArrowTopRightOnSquareIcon 
+  ArrowTopRightOnSquareIcon,
+  BriefcaseIcon
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 import { Job } from '../types';
@@ -63,6 +64,10 @@ export default function JobCard({ job }: JobCardProps) {
 
             {/* Job Meta Information */}
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
+              <div className="flex items-center space-x-1">
+                <BriefcaseIcon className="h-4 w-4" />
+                <span>{job.experience}</span>
+              </div>
               <div className="flex items-center space-x-1">
                 <MapPinIcon className="h-4 w-4" />
                 <span>{job.location}</span>

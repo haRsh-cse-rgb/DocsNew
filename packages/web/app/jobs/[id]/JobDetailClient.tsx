@@ -197,13 +197,15 @@ export default function JobDetailClient({ job }: JobDetailClientProps) {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Details</h3>
                 <div className="space-y-4">
+                {job.experience && (
+                    <div>
+                      <dt className="text-sm font-medium text-gray-500">Experience</dt>
+                      <dd className="text-sm text-gray-900">{job.experience}</dd>
+                    </div>
+                  )}
                   <div>
-                    <dt className="text-sm font-medium text-gray-500">Posted</dt>
-                    <dd className="text-sm text-gray-900">{timeAgo}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Expires</dt>
-                    <dd className="text-sm text-gray-900">{expiresIn}</dd>
+                    <dt className="text-sm font-medium text-gray-500">Salary</dt>
+                    <dd className="text-sm text-gray-900">{job.salary}</dd>
                   </div>
                   <div>
                     <dt className="text-sm font-medium text-gray-500">Category</dt>
@@ -214,9 +216,16 @@ export default function JobDetailClient({ job }: JobDetailClientProps) {
                     <dd className="text-sm text-gray-900">{job.location}</dd>
                   </div>
                   <div>
-                    <dt className="text-sm font-medium text-gray-500">Salary</dt>
-                    <dd className="text-sm text-gray-900">{job.salary}</dd>
+                    <dt className="text-sm font-medium text-gray-500">Posted</dt>
+                    <dd className="text-sm text-gray-900">{timeAgo}</dd>
                   </div>
+                  <div>
+                    <dt className="text-sm font-medium text-gray-500">Expires</dt>
+                    <dd className="text-sm text-gray-900">{expiresIn}</dd>
+                  </div>
+                  
+                  
+                  
                 </div>
               </div>
 
