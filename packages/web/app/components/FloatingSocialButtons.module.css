@@ -1,0 +1,69 @@
+.floatingButtons {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 1000;
+  animation: slideUp 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.floatingButton {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+  padding: 0;
+  /* Attention animation will be toggled with a class */
+}
+
+.floatingButton img {
+  width: 28px;
+  height: 28px;
+}
+
+.attention {
+  animation: bounce 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes bounce {
+  0% { transform: scale(1); }
+  20% { transform: scale(1.15); }
+  40% { transform: scale(0.95); }
+  60% { transform: scale(1.1); }
+  80% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 600px) {
+  .floatingButtons {
+    bottom: 16px;
+    right: 16px;
+    gap: 10px;
+  }
+  .floatingButton {
+    width: 38px;
+    height: 38px;
+  }
+  .floatingButton img {
+    width: 20px;
+    height: 20px;
+  }
+} 
