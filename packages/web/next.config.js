@@ -5,7 +5,9 @@ const nextConfig = {
       'images.pexels.com',
       'via.placeholder.com',
       'technocorps.com',
-      'logo.clearbit.com'
+      'logo.clearbit.com',
+      'example.com',
+      'cdn.pixabay.com'
     ],
   },
   env: {

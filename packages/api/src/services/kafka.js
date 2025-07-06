@@ -5,7 +5,7 @@ let producer;
 try {
   const kafka = new Kafka({
     clientId: 'jobquest-api',
-    brokers: process.env.KAFKA_BROKERS ? process.env.KAFKA_BROKERS.split(',') : ['localhost:9092']
+    brokers: process.env.KAFKA_BROKERS ? process.env.KAFKA_BROKERS.split(',') : ['kafka:9092']
   });
 
   producer = kafka.producer();

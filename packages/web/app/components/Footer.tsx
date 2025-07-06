@@ -9,8 +9,10 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <BriefcaseIcon className="h-8 w-8 text-primary-400" />
-              <span className="text-xl font-bold">JobQuest</span>
+              <img src="/IndiaJobs.png" alt="India Jobs Logo" className="h-12 w-12 bg-white rounded-full shadow p-1" />
+              <span className="text-2xl font-bold" style={{ fontFamily: 'Inter, sans-serif' }}>
+                India <span style={{ color: '#FF9800' }}>J</span>obs
+              </span>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
               A scalable, clutter-free job aggregation platform with AI-powered CV analysis 

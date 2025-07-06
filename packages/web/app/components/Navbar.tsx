@@ -13,8 +13,10 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <BriefcaseIcon className="h-8 w-8 text-primary-600" />
-            <span className="text-xl font-bold text-gray-900">JobQuest</span>
+            <img src="/IndiaJobs.png" alt="India Jobs Logo" className="h-12 w-12" />
+            <span className="text-2xl font-bold text-gray-900 flex items-center font-inter" style={{ lineHeight: '1', fontFamily: 'Inter, sans-serif' }}>
+              India <span style={{ color: '#FF9800' }}>J</span>obs
+            </span>
           </Link>
 
           {/* Desktop Navigation */}

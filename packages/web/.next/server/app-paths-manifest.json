@@ -1,1 +1,8 @@
-{}
+{
+  "/admin/jobs/new/page": "app/admin/jobs/new/page.js",
+  "/jobs/[id]/page": "app/jobs/[id]/page.js",
+  "/admin/jobs/[id]/edit/page": "app/admin/jobs/[id]/edit/page.js",
+  "/admin/sarkari-jobs/page": "app/admin/sarkari-jobs/page.js",
+  "/page": "app/page.js",
+  "/admin/jobs/page": "app/admin/jobs/page.js"
+}

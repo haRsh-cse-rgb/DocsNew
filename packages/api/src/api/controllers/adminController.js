@@ -2,14 +2,54 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand, BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand, BatchWriteCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const xlsx = require('xlsx');
 const fs = require('fs');
+const redisClient = require('../../services/redis');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
 
 const adminController = {
+  async initializeAdmin() {
+    try {
+      // Check if admin already exists
+      const params = {
+        TableName: process.env.ADMINS_TABLE,
+        Key: { email: process.env.ADMIN_EMAIL }
+      };
+
+      const command = new GetCommand(params);
+      const result = await docClient.send(command);
+
+      if (!result.Item) {
+        // Create default admin user
+        const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+        
+        const adminData = {
+          email: process.env.ADMIN_EMAIL,
+          password: hashedPassword,
+          role: 'superadmin',
+          createdAt: new Date().toISOString()
+        };
+
+        const createParams = {
+          TableName: process.env.ADMINS_TABLE,
+          Item: adminData
+        };
+
+        const createCommand = new PutCommand(createParams);
+        await docClient.send(createCommand);
+        
+        console.log('✅ Default admin user created');
+      } else {
+        console.log('✅ Admin user already exists');
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize admin user:', error);
+    }
+  },
+
   async login(req, res) {
     try {
       const { email, password } = req.body;
@@ -72,7 +112,7 @@ const adminController = {
       };
 
       // Validate required fields
-      const requiredFields = ['role', 'companyName', 'companyLogo', 'location', 'salary', 'jobDescription', 'originalLink', 'category', 'expiresOn'];
+      const requiredFields = ['role', 'companyName', 'location', 'salary', 'jobDescription', 'originalLink', 'category', 'expiresOn'];
       for (const field of requiredFields) {
         if (!jobData[field]) {
           return res.status(400).json({ error: `${field} is required` });
@@ -121,8 +161,8 @@ const adminController = {
             jobDescription: row.jobDescription,
             originalLink: row.originalLink,
             category: row.category,
-            tags: row.tags ? row.tags.split(',').map(tag => tag.trim()) : [],
-            batch: row.batch ? row.batch.split(',').map(batch => batch.trim()) : [],
+            tags: row.tags ? (typeof row.tags === 'number' ? row.tags.toString().split(',').map(tag => tag.trim()) : row.tags.split(',').map(tag => tag.trim())) : [],
+            batch: row.batch ? (typeof row.batch === 'number' ? row.batch.toString().split(',').map(batch => batch.trim()) : row.batch.split(',').map(batch => batch.trim())) : [],
             expiresOn: row.expiresOn,
             postedOn: new Date().toISOString(),
             status: 'active'
@@ -246,21 +286,37 @@ const adminController = {
       const scanResult = await docClient.send(scanCommand);
 
       if (!scanResult.Items || scanResult.Items.length === 0) {
-        return res.status(404).json({ error: 'Job not found' });
+        // If not found, treat as already deleted (idempotent)
+        return res.json({ message: 'Job deleted successfully (not found, already deleted)' });
       }
 
-      const job = scanResult.Items[0];
+      // There could be multiple jobs with the same jobId in different categories (shouldn't happen, but handle it)
+      for (const job of scanResult.Items) {
+        const params = {
+          TableName: process.env.JOBS_TABLE,
+          Key: {
+            category: job.category,
+            jobId: id
+          }
+        };
+        const command = new DeleteCommand(params);
+        await docClient.send(command);
+      }
 
-      const params = {
-        TableName: process.env.JOBS_TABLE,
-        Key: {
-          category: job.category,
-          jobId: id
+      // Invalidate Redis cache for this job and all jobs lists
+      try {
+        // Delete job detail cache
+        await redisClient.del(`job:${id}`);
+        // Delete all jobs list caches (keys starting with jobs:)
+        if (redisClient.keys) {
+          const keys = await redisClient.keys('jobs:*');
+          if (Array.isArray(keys) && keys.length > 0) {
+            await redisClient.del(keys);
+          }
         }
-      };
-
-      const command = new DeleteCommand(params);
-      await docClient.send(command);
+      } catch (cacheErr) {
+        console.warn('Failed to invalidate jobs cache:', cacheErr);
+      }
 
       res.json({ message: 'Job deleted successfully' });
     } catch (error) {

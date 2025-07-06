@@ -38,6 +38,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // API Routes
 app.use('/api/v1', require('./src/api/routes'));
 
+// Initialize admin user
+const adminController = require('./src/api/controllers/adminController');
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -58,10 +61,13 @@ app.use('*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 JobQuest API Server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🔗 API Base URL: http://localhost:${PORT}/api/v1`);
+  
+  // Initialize admin user
+  await adminController.initializeAdmin();
 });
 
 // Graceful shutdown
