@@ -111,6 +111,12 @@ export default function JobsManagement() {
             </div>
             <div className="flex space-x-3">
               <button
+                onClick={() => router.push('/admin/dashboard')}
+                className="btn-primary flex items-center space-x-2"
+              >
+                <span>Go to Dashboard</span>
+              </button>
+              <button
                 onClick={() => router.push('/admin/jobs/bulk')}
                 className="btn-secondary flex items-center space-x-2"
               >

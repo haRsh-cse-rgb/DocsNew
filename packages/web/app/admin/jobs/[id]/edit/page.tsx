@@ -130,17 +130,25 @@ export default function EditJob() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeftIcon className="h-6 w-6" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Edit Job</h1>
-              <p className="text-gray-600">Update job posting details</p>
+          <div className="flex items-center space-x-4 justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => router.back()}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeftIcon className="h-6 w-6" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Edit Job</h1>
+                <p className="text-gray-600">Update job posting details</p>
+              </div>
             </div>
+            <button
+              onClick={() => router.push('/admin/dashboard')}
+              className="btn-primary flex items-center space-x-2"
+            >
+              <span>Go to Dashboard</span>
+            </button>
           </div>
         </div>
       </div>

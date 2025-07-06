@@ -262,6 +262,21 @@ const adminController = {
       const command = new UpdateCommand(params);
       const result = await docClient.send(command);
 
+      // Invalidate Redis cache for this job and all jobs lists
+      try {
+        // Delete job detail cache
+        await redisClient.del(`job:${id}`);
+        // Delete all jobs list caches (keys starting with jobs:)
+        if (redisClient.keys) {
+          const keys = await redisClient.keys('jobs:*');
+          if (Array.isArray(keys) && keys.length > 0) {
+            await redisClient.del(keys);
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('Failed to invalidate jobs cache:', cacheErr);
+      }
+
       res.json({ message: 'Job updated successfully', job: result.Attributes });
     } catch (error) {
       console.error('Error updating job:', error);
@@ -486,6 +501,21 @@ const adminController = {
       const command = new UpdateCommand(params);
       const result = await docClient.send(command);
 
+      // Invalidate Redis cache for this sarkari job and all sarkari jobs lists
+      try {
+        // Delete sarkari job detail cache
+        await redisClient.del(`sarkari-job:${id}`);
+        // Delete all sarkari jobs list caches (keys starting with sarkari-jobs:)
+        if (redisClient.keys) {
+          const keys = await redisClient.keys('sarkari-jobs:*');
+          if (Array.isArray(keys) && keys.length > 0) {
+            await redisClient.del(keys);
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('Failed to invalidate sarkari jobs cache:', cacheErr);
+      }
+
       res.json({ message: 'Sarkari job updated successfully', job: result.Attributes });
     } catch (error) {
       console.error('Error updating sarkari job:', error);
@@ -524,6 +554,21 @@ const adminController = {
 
       const command = new DeleteCommand(params);
       await docClient.send(command);
+
+      // Invalidate Redis cache for this sarkari job and all sarkari jobs lists
+      try {
+        // Delete sarkari job detail cache
+        await redisClient.del(`sarkari-job:${id}`);
+        // Delete all sarkari jobs list caches (keys starting with sarkari-jobs:)
+        if (redisClient.keys) {
+          const keys = await redisClient.keys('sarkari-jobs:*');
+          if (Array.isArray(keys) && keys.length > 0) {
+            await redisClient.del(keys);
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('Failed to invalidate sarkari jobs cache:', cacheErr);
+      }
 
       res.json({ message: 'Sarkari job deleted successfully' });
     } catch (error) {

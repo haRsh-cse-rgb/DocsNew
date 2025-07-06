@@ -99,8 +99,10 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <BriefcaseIcon className="h-8 w-8 text-primary-600" />
-              <h1 className="text-xl font-bold text-gray-900">JobQuest Admin</h1>
+              <img src="/IndiaJobs.png" alt="India Jobs Logo" className="h-10 w-10" />
+              <span className="text-2xl font-bold text-gray-900 flex items-center" style={{ fontFamily: 'Inter, sans-serif', lineHeight: '1' }}>
+                India <span style={{ color: '#FF9800' }}>J</span>obs
+              </span>
             </div>
             
             <div className="flex items-center space-x-4">

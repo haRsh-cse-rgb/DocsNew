@@ -86,8 +86,8 @@ export default function SarkariJobsManagement() {
     return matchesSearch && matchesOrganization && matchesStatus;
   });
 
-  const organizations = [...new Set(jobs.map(job => job.organization))];
-  const statuses = [...new Set(jobs.map(job => job.status))];
+  const organizations = Array.from(new Set(jobs.map(job => job.organization)));
+  const statuses = Array.from(new Set(jobs.map(job => job.status)));
 
   if (loading) {
     return (
@@ -106,11 +106,17 @@ export default function SarkariJobsManagement() {
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex justify-between items-center">
-            <div>
+            <div className="flex items-center space-x-4">
               <h1 className="text-2xl font-bold text-gray-900">Government Jobs Management</h1>
               <p className="text-gray-600">Manage government job postings</p>
             </div>
             <div className="flex space-x-3">
+              <button
+                onClick={() => router.push('/admin/dashboard')}
+                className="btn-primary flex items-center space-x-2"
+              >
+                <span>Go to Dashboard</span>
+              </button>
               <button
                 onClick={() => router.push('/admin/sarkari-jobs/bulk')}
                 className="btn-secondary flex items-center space-x-2"

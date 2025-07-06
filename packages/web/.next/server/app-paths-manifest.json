@@ -1,8 +1,7 @@
 {
-  "/admin/jobs/new/page": "app/admin/jobs/new/page.js",
-  "/jobs/[id]/page": "app/jobs/[id]/page.js",
-  "/admin/jobs/[id]/edit/page": "app/admin/jobs/[id]/edit/page.js",
-  "/admin/sarkari-jobs/page": "app/admin/sarkari-jobs/page.js",
-  "/page": "app/page.js",
-  "/admin/jobs/page": "app/admin/jobs/page.js"
+  "/admin/jobs/page": "app/admin/jobs/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/admin/sarkari-jobs/new/page": "app/admin/sarkari-jobs/new/page.js",
+  "/admin/sarkari-jobs/page": "app/admin/sarkari-jobs/page.js"
 }
