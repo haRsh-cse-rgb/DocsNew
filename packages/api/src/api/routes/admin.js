@@ -12,6 +12,15 @@ router.post('/login', adminController.login);
 // Protected admin routes
 router.use(authMiddleware);
 
+// Dashboard stats
+router.get('/stats', adminController.getStats);
+
+// Recent activity
+router.get('/recent-activity', adminController.getRecentActivity);
+
+// Admin management
+router.post('/admins', adminController.createAdmin);
+
 // Jobs management
 router.post('/jobs', adminController.createJob);
 router.post('/jobs/bulk', upload.single('file'), adminController.bulkUploadJobs);

@@ -6,6 +6,7 @@ const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCom
 const xlsx = require('xlsx');
 const fs = require('fs');
 const redisClient = require('../../services/redis');
+const logActivity = require('../utils/activityLogger');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -126,6 +127,15 @@ const adminController = {
 
       const command = new PutCommand(params);
       await docClient.send(command);
+      // Log activity
+      if (req.user && req.user.email) {
+        await logActivity({
+          action: 'added',
+          targetType: 'job',
+          targetId: jobData.jobId,
+          adminEmail: req.user.email,
+        });
+      }
 
       res.status(201).json({ message: 'Job created successfully', job: jobData });
     } catch (error) {
@@ -261,6 +271,15 @@ const adminController = {
 
       const command = new UpdateCommand(params);
       const result = await docClient.send(command);
+      // Log activity
+      if (req.user && req.user.email) {
+        await logActivity({
+          action: 'updated',
+          targetType: 'job',
+          targetId: id,
+          adminEmail: req.user.email,
+        });
+      }
 
       // Invalidate Redis cache for this job and all jobs lists
       try {
@@ -332,6 +351,15 @@ const adminController = {
       } catch (cacheErr) {
         console.warn('Failed to invalidate jobs cache:', cacheErr);
       }
+      // Log activity
+      if (req.user && req.user.email) {
+        await logActivity({
+          action: 'deleted',
+          targetType: 'job',
+          targetId: id,
+          adminEmail: req.user.email,
+        });
+      }
 
       res.json({ message: 'Job deleted successfully' });
     } catch (error) {
@@ -345,7 +373,7 @@ const adminController = {
       const jobData = {
         ...req.body,
         jobId: uuidv4(),
-        createdAt: new Date().toISOString(),
+        postedOn: new Date().toISOString(),
         status: 'active'
       };
 
@@ -363,6 +391,15 @@ const adminController = {
 
       const command = new PutCommand(params);
       await docClient.send(command);
+      // Log activity
+      if (req.user && req.user.email) {
+        await logActivity({
+          action: 'added',
+          targetType: 'sarkari-job',
+          targetId: jobData.jobId,
+          adminEmail: req.user.email,
+        });
+      }
 
       res.status(201).json({ message: 'Sarkari job created successfully', job: jobData });
     } catch (error) {
@@ -500,6 +537,15 @@ const adminController = {
 
       const command = new UpdateCommand(params);
       const result = await docClient.send(command);
+      // Log activity
+      if (req.user && req.user.email) {
+        await logActivity({
+          action: 'updated',
+          targetType: 'sarkari-job',
+          targetId: id,
+          adminEmail: req.user.email,
+        });
+      }
 
       // Invalidate Redis cache for this sarkari job and all sarkari jobs lists
       try {
@@ -569,11 +615,119 @@ const adminController = {
       } catch (cacheErr) {
         console.warn('Failed to invalidate sarkari jobs cache:', cacheErr);
       }
+      // Log activity
+      if (req.user && req.user.email) {
+        await logActivity({
+          action: 'deleted',
+          targetType: 'sarkari-job',
+          targetId: id,
+          adminEmail: req.user.email,
+        });
+      }
 
       res.json({ message: 'Sarkari job deleted successfully' });
     } catch (error) {
       console.error('Error deleting sarkari job:', error);
       res.status(500).json({ error: 'Failed to delete sarkari job' });
+    }
+  },
+
+  async createAdmin(req, res) {
+    try {
+      const { email, password, role } = req.body;
+      if (!email || !password || !role) {
+        return res.status(400).json({ error: 'Email, password, and role are required' });
+      }
+      // Check if admin already exists
+      const params = {
+        TableName: process.env.ADMINS_TABLE,
+        Key: { email }
+      };
+      const command = new GetCommand(params);
+      const result = await docClient.send(command);
+      if (result.Item) {
+        return res.status(409).json({ error: 'Admin with this email already exists' });
+      }
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const adminData = {
+        email,
+        password: hashedPassword,
+        role,
+        createdAt: new Date().toISOString()
+      };
+      const createParams = {
+        TableName: process.env.ADMINS_TABLE,
+        Item: adminData
+      };
+      const createCommand = new PutCommand(createParams);
+      await docClient.send(createCommand);
+      res.status(201).json({ message: 'Admin created successfully', admin: { email, role } });
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      res.status(500).json({ error: 'Failed to create admin' });
+    }
+  },
+
+  async getStats(req, res) {
+    try {
+      // Count private jobs
+      const jobsParams = {
+        TableName: process.env.JOBS_TABLE,
+      };
+      const jobsCommand = new ScanCommand(jobsParams);
+      const jobsResult = await docClient.send(jobsCommand);
+      const totalPrivateJobs = jobsResult.Items ? jobsResult.Items.length : 0;
+      const activePrivateJobs = jobsResult.Items ? jobsResult.Items.filter(j => j.status === 'active').length : 0;
+
+      // Count government jobs
+      const sarkariParams = {
+        TableName: process.env.SARKARI_JOBS_TABLE,
+      };
+      const sarkariCommand = new ScanCommand(sarkariParams);
+      const sarkariResult = await docClient.send(sarkariCommand);
+      const totalGovtJobs = sarkariResult.Items ? sarkariResult.Items.length : 0;
+      const activeGovtJobs = sarkariResult.Items ? sarkariResult.Items.filter(j => j.status === 'active').length : 0;
+
+      // Count subscriptions
+      let totalSubscriptions = 0;
+      if (process.env.SUBSCRIPTIONS_TABLE) {
+        const subsParams = {
+          TableName: process.env.SUBSCRIPTIONS_TABLE,
+        };
+        const subsCommand = new ScanCommand(subsParams);
+        const subsResult = await docClient.send(subsCommand);
+        totalSubscriptions = subsResult.Items ? subsResult.Items.length : 0;
+      }
+
+      res.json({
+        totalPrivateJobs,
+        activePrivateJobs,
+        totalGovtJobs,
+        activeGovtJobs,
+        totalSubscriptions
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    }
+  },
+
+  async getRecentActivity(req, res) {
+    try {
+      const AWS = require('aws-sdk');
+      const dynamoDb = new AWS.DynamoDB.DocumentClient();
+      const params = {
+        TableName: 'AdminActivities',
+        Limit: 20,
+      };
+      const data = await dynamoDb.scan(params).promise();
+      // Sort by timestamp descending
+      const activities = data.Items.sort((a, b) => b.timestamp - a.timestamp).slice(0, 20);
+      res.json(activities);
+    } catch (error) {
+      console.error('Error fetching recent activities:', error);
+      res.status(500).json({ error: 'Failed to fetch recent activities' });
     }
   }
 };

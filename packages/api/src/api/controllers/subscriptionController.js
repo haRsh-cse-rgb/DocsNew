@@ -1,6 +1,7 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
 const kafkaProducer = require('../../services/kafka');
+const logActivity = require('../utils/activityLogger');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -63,6 +64,15 @@ const subscriptionController = {
         email,
         categories
       });
+      // Log activity (if admin)
+      if (req.user && req.user.email) {
+        await logActivity({
+          action: 'added',
+          targetType: 'subscription',
+          targetId: email,
+          adminEmail: req.user.email,
+        });
+      }
     } catch (error) {
       console.error('Error processing subscription:', error);
       res.status(500).json({ error: 'Subscription failed' });

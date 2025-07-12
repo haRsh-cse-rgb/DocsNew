@@ -69,6 +69,12 @@ export default function Hero() {
               >
                 Browse All Jobs
               </a>
+              <a
+                href="/government-jobs"
+                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-xl transition-colors duration-200"
+              >
+                Government Jobs
+              </a>
             </div>
 
             {/* Stats */}

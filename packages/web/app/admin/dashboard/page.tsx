@@ -11,6 +11,8 @@ import {
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+import { Dialog } from '@headlessui/react';
 
 interface AdminUser {
   email: string;
@@ -20,6 +22,11 @@ interface AdminUser {
 export default function AdminDashboard() {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
+  const [newAdmin, setNewAdmin] = useState({ email: '', password: '', role: 'admin' });
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -43,11 +50,62 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) return;
+        const response = await axios.get('/api/admin/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setStats(response.data);
+      } catch (error) {
+        setStats(null);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  useEffect(() => {
+    const fetchRecentActivity = async () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) return;
+        const response = await axios.get('/api/admin/recent-activity', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setRecentActivity(response.data);
+      } catch (error) {
+        setRecentActivity([]);
+      }
+    };
+    fetchRecentActivity();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
     toast.success('Logged out successfully');
     router.push('/admin/login');
+  };
+
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreatingAdmin(true);
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) throw new Error('Not authenticated');
+      await axios.post('/api/admin/admins', newAdmin, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Admin created successfully');
+      setShowCreateAdminModal(false);
+      setNewAdmin({ email: '', password: '', role: 'admin' });
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || 'Failed to create admin');
+    } finally {
+      setCreatingAdmin(false);
+    }
   };
 
   const dashboardCards = [
@@ -104,8 +162,14 @@ export default function AdminDashboard() {
                 India <span style={{ color: '#FF9800' }}>J</span>obs
               </span>
             </div>
-            
             <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowCreateAdminModal(true)}
+                className="flex items-center space-x-2 text-blue-600 hover:text-blue-900 transition-colors border border-blue-600 px-3 py-1 rounded-md"
+              >
+                <CogIcon className="h-5 w-5" />
+                <span>Create Admin</span>
+              </button>
               <span className="text-sm text-gray-600">
                 Welcome, {adminUser?.email}
               </span>
@@ -120,6 +184,67 @@ export default function AdminDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Create Admin Modal */}
+      <Dialog open={showCreateAdminModal} onClose={() => setShowCreateAdminModal(false)} className="fixed z-50 inset-0 overflow-y-auto">
+        <div className="flex items-center justify-center min-h-screen px-4">
+          <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+          <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-auto p-6 z-10">
+            <Dialog.Title className="text-lg font-bold mb-4">Create New Admin</Dialog.Title>
+            <form onSubmit={handleCreateAdmin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  className="input-field w-full"
+                  value={newAdmin.email}
+                  onChange={e => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <input
+                  type="password"
+                  className="input-field w-full"
+                  value={newAdmin.password}
+                  onChange={e => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Role</label>
+                <select
+                  className="input-field w-full"
+                  value={newAdmin.role}
+                  onChange={e => setNewAdmin({ ...newAdmin, role: e.target.value })}
+                  required
+                >
+                  <option value="admin">Admin</option>
+                  <option value="superadmin">Super Admin</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={() => setShowCreateAdminModal(false)}
+                  disabled={creatingAdmin}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={creatingAdmin}
+                >
+                  {creatingAdmin ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Dialog>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -158,28 +283,28 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
+                <p className="text-sm font-medium text-gray-600">Total Private Jobs</p>
+                <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalPrivateJobs : 0}</p>
+                <p className="text-sm text-gray-500">Active: {stats ? stats.activePrivateJobs : 0}</p>
               </div>
               <BriefcaseIcon className="h-8 w-8 text-gray-400" />
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Jobs</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
+                <p className="text-sm font-medium text-gray-600">Total Govt Jobs</p>
+                <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalGovtJobs : 0}</p>
+                <p className="text-sm text-gray-500">Active: {stats ? stats.activeGovtJobs : 0}</p>
               </div>
               <DocumentTextIcon className="h-8 w-8 text-gray-400" />
             </div>
           </div>
-
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Subscriptions</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
+                <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalSubscriptions : 0}</p>
               </div>
               <ChartBarIcon className="h-8 w-8 text-gray-400" />
             </div>
@@ -192,9 +317,29 @@ export default function AdminDashboard() {
             <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
           </div>
           <div className="p-6">
-            <p className="text-gray-600 text-center py-8">
-              No recent activity to display
-            </p>
+            {recentActivity.length === 0 ? (
+              <p className="text-gray-600 text-center py-8">
+                No recent activity to display
+              </p>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {recentActivity.map((activity, idx) => (
+                  <li key={activity.id || idx} className="py-4 flex items-center justify-between">
+                    <div>
+                      <span className="font-medium">{activity.adminEmail}</span>
+                      {' '}
+                      <span className="text-gray-700">{activity.action}</span>
+                      {' '}
+                      <span className="font-semibold">{activity.targetType}</span>
+                      {activity.targetId && <> (<span className="text-gray-500">{activity.targetId}</span>)</>}
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {new Date(activity.timestamp).toLocaleString()}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </main>
