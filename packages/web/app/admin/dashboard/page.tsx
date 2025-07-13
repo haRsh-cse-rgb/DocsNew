@@ -316,29 +316,34 @@ export default function AdminDashboard() {
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
           </div>
-          <div className="p-6">
+          <div className="p-6 overflow-x-auto">
             {recentActivity.length === 0 ? (
               <p className="text-gray-600 text-center py-8">
                 No recent activity to display
               </p>
             ) : (
-              <ul className="divide-y divide-gray-200">
-                {recentActivity.map((activity, idx) => (
-                  <li key={activity.id || idx} className="py-4 flex items-center justify-between">
-                    <div>
-                      <span className="font-medium">{activity.adminEmail}</span>
-                      {' '}
-                      <span className="text-gray-700">{activity.action}</span>
-                      {' '}
-                      <span className="font-semibold">{activity.targetType}</span>
-                      {activity.targetId && <> (<span className="text-gray-500">{activity.targetId}</span>)</>}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      {new Date(activity.timestamp).toLocaleString()}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target Type</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target ID</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin Email</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {recentActivity.map((activity, idx) => (
+                    <tr key={activity.id || idx}>
+                      <td className="px-4 py-2 whitespace-nowrap font-semibold text-blue-700">{activity.action}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{activity.targetType}</td>
+                      <td className="px-4 py-2 whitespace-nowrap text-gray-600">{activity.targetId}</td>
+                      <td className="px-4 py-2 whitespace-nowrap text-gray-900">{activity.adminEmail}</td>
+                      <td className="px-4 py-2 whitespace-nowrap text-gray-500">{activity.timestamp ? new Date(activity.timestamp).toLocaleString() : ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
