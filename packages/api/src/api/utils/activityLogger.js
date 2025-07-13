@@ -19,9 +19,7 @@ async function logActivity({ action, targetType, targetId, adminEmail }) {
     },
   };
   try {
-    console.log('Logging activity to AdminActivities:', params.Item);
     await dynamoDb.put(params).promise();
-    console.log('Activity logged successfully');
   } catch (err) {
     console.error('Error logging activity:', err);
   }

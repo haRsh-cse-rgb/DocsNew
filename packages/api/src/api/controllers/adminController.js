@@ -128,12 +128,12 @@ const adminController = {
       const command = new PutCommand(params);
       await docClient.send(command);
       // Log activity
-      if (req.user && req.user.email) {
+      if (req.admin && req.admin.email) {
         await logActivity({
           action: 'added',
           targetType: 'job',
           targetId: jobData.jobId,
-          adminEmail: req.user.email,
+          adminEmail: req.admin.email,
         });
       }
 
@@ -272,12 +272,12 @@ const adminController = {
       const command = new UpdateCommand(params);
       const result = await docClient.send(command);
       // Log activity
-      if (req.user && req.user.email) {
+      if (req.admin && req.admin.email) {
         await logActivity({
           action: 'updated',
           targetType: 'job',
           targetId: id,
-          adminEmail: req.user.email,
+          adminEmail: req.admin.email,
         });
       }
 
@@ -352,12 +352,12 @@ const adminController = {
         console.warn('Failed to invalidate jobs cache:', cacheErr);
       }
       // Log activity
-      if (req.user && req.user.email) {
+      if (req.admin && req.admin.email) {
         await logActivity({
           action: 'deleted',
           targetType: 'job',
           targetId: id,
-          adminEmail: req.user.email,
+          adminEmail: req.admin.email,
         });
       }
 
@@ -392,12 +392,12 @@ const adminController = {
       const command = new PutCommand(params);
       await docClient.send(command);
       // Log activity
-      if (req.user && req.user.email) {
+      if (req.admin && req.admin.email) {
         await logActivity({
           action: 'added',
           targetType: 'sarkari-job',
           targetId: jobData.jobId,
-          adminEmail: req.user.email,
+          adminEmail: req.admin.email,
         });
       }
 
@@ -538,12 +538,12 @@ const adminController = {
       const command = new UpdateCommand(params);
       const result = await docClient.send(command);
       // Log activity
-      if (req.user && req.user.email) {
+      if (req.admin && req.admin.email) {
         await logActivity({
           action: 'updated',
           targetType: 'sarkari-job',
           targetId: id,
-          adminEmail: req.user.email,
+          adminEmail: req.admin.email,
         });
       }
 
@@ -616,12 +616,12 @@ const adminController = {
         console.warn('Failed to invalidate sarkari jobs cache:', cacheErr);
       }
       // Log activity
-      if (req.user && req.user.email) {
+      if (req.admin && req.admin.email) {
         await logActivity({
           action: 'deleted',
           targetType: 'sarkari-job',
           targetId: id,
-          adminEmail: req.user.email,
+          adminEmail: req.admin.email,
         });
       }
 
@@ -717,14 +717,24 @@ const adminController = {
     try {
       const AWS = require('aws-sdk');
       const dynamoDb = new AWS.DynamoDB.DocumentClient();
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 20;
       const params = {
         TableName: 'AdminActivities',
-        Limit: 20,
       };
       const data = await dynamoDb.scan(params).promise();
-      // Sort by timestamp descending
-      const activities = data.Items.sort((a, b) => b.timestamp - a.timestamp).slice(0, 20);
-      res.json(activities);
+      const sorted = data.Items.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const total = sorted.length;
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      const activities = sorted.slice(start, end);
+      res.json({
+        activities,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+        limit,
+      });
     } catch (error) {
       console.error('Error fetching recent activities:', error);
       res.status(500).json({ error: 'Failed to fetch recent activities' });
