@@ -55,6 +55,20 @@ export default function JobDetailClient({ job }: JobDetailClientProps) {
     toast.success('Job bookmarked! (Feature coming soon)');
   };
 
+  function parseJobDescription(desc?: string) {
+    if (!desc) return [];
+    // Split by ';' for sections
+    return desc.split(';').map(section => {
+      const [heading, ...rest] = section.split(':');
+      return {
+        heading: rest.length ? heading.trim() : null,
+        content: rest.length ? rest.join(':').split(',').map(s => s.trim()).filter(Boolean) : [heading.trim()]
+      };
+    }).filter(item => item.content.length > 0);
+  }
+
+  const descriptionSections = parseJobDescription(job.jobDescription);
+
   return (
     <>
       <Navbar />
@@ -170,9 +184,22 @@ export default function JobDetailClient({ job }: JobDetailClientProps) {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Job Description</h3>
                 <div className="prose prose-gray max-w-none">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                    {job.jobDescription}
-                  </p>
+                  {descriptionSections.length > 0 ? (
+                    descriptionSections.map((section, idx) => (
+                      <div key={idx} className="mb-3">
+                        {section.heading && (
+                          <div className="font-bold text-blue-700 mb-1">{section.heading}</div>
+                        )}
+                        <ul className="list-disc pl-5">
+                          {section.content.map((point, i) => (
+                            <li key={i} className="text-gray-800 text-base">{point}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-gray-600">No description provided.</span>
+                  )}
                 </div>
               </div>
 

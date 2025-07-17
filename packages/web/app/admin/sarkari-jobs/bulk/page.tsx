@@ -72,8 +72,8 @@ export default function BulkUploadSarkariJobs() {
 
   const downloadTemplate = () => {
     // Create a sample CSV template for sarkari jobs
-    const csvContent = `postName,organization,advertisementNo,applicationStart,applicationEnd,examDate,applicationFee,vacancyDetails,eligibility,officialWebsite,notificationLink,applyLink,resultLink
-Civil Services,UPSC,01/2024,2024-01-01,2024-02-01,2024-06-01,₹1000,1000 vacancies,Graduate degree required,https://upsc.gov.in,https://upsc.gov.in/notification,https://upsc.gov.in/apply,
+    const csvContent = `postName,organization,advertisementNo,applicationStart,applicationEnd,examDate,applicationFee,vacancyDetails,eligibility,officialWebsite,notificationLink,applyLink,resultLink\n"
+Platoon Commander,Rajasthan Staff Selection Board RSSB,2025/01,2025-07-23,2025-08-21,Notified Soon,"Gen / OBC : Rs. 600/-; BC / SBC / EWS : Rs. 400/-; SC / ST : Rs. 400/-","General : 34; SC : 13; ST : 9; OBC : 16; EBC : 4; EWS : 8","Bachelor Degree in Any Stream From A Recognized University. With Working knowledge of Hindi written in Devnagri Script and knowledge of Rajasthani Culture. Age : 20-25 Years As on 01.01.2026 Extra Age As Per Rules.",https://rssb.rajasthan.gov.in/,https://rssb.rajasthan.gov.in/storage/advertisement_item/1752762618.pdf,https://sso.rajasthan.gov.in/signin,,\n"
 Bank PO,IBPS,02/2024,2024-02-01,2024-03-01,2024-07-01,₹850,5000 vacancies,Graduate degree required,https://ibps.in,https://ibps.in/notification,https://ibps.in/apply,https://ibps.in/results`;
 
     const blob = new Blob([csvContent], { type: 'text/csv' });

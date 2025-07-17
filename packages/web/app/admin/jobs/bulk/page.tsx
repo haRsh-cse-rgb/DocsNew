@@ -71,10 +71,10 @@ export default function BulkUploadJobs() {
   };
 
   const downloadTemplate = () => {
-    // Create a sample CSV template
-    const csvContent = `role,companyName,companyLogo,location,salary,jobDescription,originalLink,category,tags,batch,expiresOn
-Frontend Developer,Tech Corp,https://example.com/logo.png,Bangalore,₹10-15 LPA,We are looking for a skilled frontend developer...,https://techcorp.com/careers/frontend,Software,"react,javascript,frontend","2024,2025",2024-12-31
-Backend Developer,Startup Inc,https://example.com/startup-logo.png,Mumbai,₹12-18 LPA,Join our growing team as a backend developer...,https://startupinc.com/careers/backend,Software,"nodejs,python,backend","2024,2025",2024-12-31`;
+    // Create a sample CSV template for private jobs
+    const csvContent = `role,companyName,jobDescription,location,salary,category,status,postedOn,expiresOn,tags,batch,experience,originalLink
+Frontend Developer,TechCorp,"Role: Frontend Developer; Responsibilities: Build UI components, Write tests, Collaborate with team; Skills: React, TypeScript, CSS, Git; Perks: Flexible hours, Remote work",Bangalore,12 LPA,Software,active,2025-01-01,2025-03-01,"React;TypeScript;CSS",2025,2+ years,"https://techcorp.com/careers/123"
+Backend Developer,DataSoft,"Role: Backend Developer; Responsibilities: Build APIs, Optimize DB, Write tests; Skills: Node.js, PostgreSQL, Docker",Hyderabad,15 LPA,Backend,active,2025-02-01,2025-04-01,"Node.js;PostgreSQL;Docker",2025,3+ years,"https://datasoft.com/jobs/456"`;
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

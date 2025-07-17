@@ -28,7 +28,7 @@ export default function Navbar() {
               Jobs
             </Link>
             <Link 
-              href="/sarkari-jobs" 
+              href="/government-jobs" 
               className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
             >
               Government Jobs
@@ -74,7 +74,7 @@ export default function Navbar() {
                 Jobs
               </Link>
               <Link 
-                href="/sarkari-jobs" 
+                href="/government-jobs" 
                 className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >

@@ -9,7 +9,8 @@ import {
   CalendarIcon,
   SparklesIcon,
   ArrowTopRightOnSquareIcon,
-  BriefcaseIcon
+  BriefcaseIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 import { Job } from '../types';
@@ -18,32 +19,60 @@ interface JobCardProps {
   job: Job;
 }
 
+function parseJobDescription(desc?: string) {
+  if (!desc) return [];
+  // Split by ';' for sections
+  return desc.split(';').map(section => {
+    const [heading, ...rest] = section.split(':');
+    return {
+      heading: rest.length ? heading.trim() : null,
+      content: rest.length ? rest.join(':').split(',').map(s => s.trim()).filter(Boolean) : [heading.trim()]
+    };
+  }).filter(item => item.content.length > 0);
+}
+
 export default function JobCard({ job }: JobCardProps) {
   const [showCVAnalysis, setShowCVAnalysis] = useState(false);
 
-  const postedDate = new Date(job.postedOn);
-  const timeAgo = formatDistanceToNow(postedDate, { addSuffix: true });
+  let timeAgo = 'Unknown';
+  if (job.postedOn) {
+    const postedDate = new Date(job.postedOn);
+    if (!isNaN(postedDate.getTime())) {
+      timeAgo = formatDistanceToNow(postedDate, { addSuffix: true });
+    }
+  }
+
+  const descriptionSections = parseJobDescription(job.jobDescription);
 
   return (
     <>
       <div className="card hover:shadow-lg transition-all duration-300 group">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Company Logo */}
-          <div className="flex-shrink-0">
+          {job.companyName ? (
             <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
               <Image
-                src={job.companyLogo || `https://logo.clearbit.com/${job.companyName.toLowerCase().replace(/\s+/g, '')}.com`}
-                alt={`${job.companyName} logo`}
+                src={
+                  job.companyLogo ||
+                  (job.companyName
+                    ? `https://logo.clearbit.com/${job.companyName.toLowerCase().replace(/\s+/g, '')}.com`
+                    : 'https://via.placeholder.com/64x64/3B82F6/FFFFFF?text=J')
+                }
+                alt={`${job.companyName || 'Job'} logo`}
                 width={64}
                 height={64}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
-                  target.src = `https://via.placeholder.com/64x64/3B82F6/FFFFFF?text=${job.companyName.charAt(0)}`;
+                  target.src = `https://via.placeholder.com/64x64/3B82F6/FFFFFF?text=${job.companyName ? job.companyName.charAt(0) : 'J'}`;
                 }}
               />
             </div>
-          </div>
+          ) : (
+            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+              <BuildingOfficeIcon className="h-8 w-8 text-gray-400" />
+            </div>
+          )}
 
           {/* Job Details */}
           <div className="flex-1 min-w-0">
@@ -81,14 +110,6 @@ export default function JobCard({ job }: JobCardProps) {
                 <span>{timeAgo}</span>
               </div>
             </div>
-
-            {/* Job Description Preview */}
-            <p className="text-gray-600 mb-4 line-clamp-2">
-              {job.jobDescription.length > 150 
-                ? `${job.jobDescription.substring(0, 150)}...` 
-                : job.jobDescription
-              }
-            </p>
 
             {/* Tags */}
             {job.tags && job.tags.length > 0 && (

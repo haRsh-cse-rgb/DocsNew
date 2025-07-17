@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import JobCard from '../components/JobCard';
+import GovernmentJobCard from '../components/GovernmentJobCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import { SarkariJob } from '../types';
 import axios from 'axios';
+import Link from 'next/link';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function GovernmentJobsPage() {
   const [jobs, setJobs] = useState<SarkariJob[]>([]);
@@ -51,6 +53,15 @@ export default function GovernmentJobsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen">
+      <div className="mb-6">
+        <Link 
+          href="/"
+          className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+        >
+          <ArrowLeftIcon className="h-5 w-5" />
+          <span>Back to Home</span>
+        </Link>
+      </div>
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Latest Government Jobs</h1>
       <p className="text-gray-600 mb-8">Explore the latest government (Sarkari) job opportunities across India. Updated regularly with new openings.</p>
       {loading ? (
@@ -71,7 +82,7 @@ export default function GovernmentJobsPage() {
           <div className="grid gap-6 mb-8">
             {jobs.map((job, index) => (
               <div key={job.jobId} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                <JobCard job={job} />
+                <GovernmentJobCard job={job} />
               </div>
             ))}
           </div>

@@ -44,7 +44,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/sarkari-jobs" className="text-gray-300 hover:text-white transition-colors duration-200">
+                <Link href="/government-jobs" className="text-gray-300 hover:text-white transition-colors duration-200">
                   Government Jobs
                 </Link>
               </li>
