@@ -1,6 +1,4 @@
 {
   "/page": "app/page.js",
-  "/government-jobs/page": "app/government-jobs/page.js",
-  "/government-jobs/[id]/page": "app/government-jobs/[id]/page.js",
-  "/jobs/[id]/page": "app/jobs/[id]/page.js"
+  "/government-jobs/page": "app/government-jobs/page.js"
 }
