@@ -8,6 +8,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 const jobsController = {
   async getJobs(req, res) {
     try {
+      // Debug: log the entire query object
       const {
         page = 1,
         limit = 15,
@@ -15,7 +16,8 @@ const jobsController = {
         location,
         batch,
         tags,
-        q: searchTerm
+        q: searchTerm,
+        role // <-- add this
       } = req.query;
 
       const offset = (page - 1) * limit;
@@ -53,8 +55,15 @@ const jobsController = {
       }
 
       if (batch) {
-        params.FilterExpression += ' AND contains(batch, :batch)';
-        params.ExpressionAttributeValues[':batch'] = batch;
+        params.ExpressionAttributeNames['#batch'] = 'batch';
+        if (batch === "Not Mentioned") {
+          // Find jobs where batch is missing or empty
+          params.FilterExpression += ' AND (attribute_not_exists(#batch) OR size(#batch) = :zero)';
+          params.ExpressionAttributeValues[':zero'] = 0;
+        } else {
+          params.FilterExpression += ' AND contains(#batch, :batch)';
+          params.ExpressionAttributeValues[':batch'] = batch;
+        }
       }
 
       if (tags) {
@@ -68,22 +77,67 @@ const jobsController = {
         params.ExpressionAttributeValues[':searchTerm'] = searchTerm;
       }
 
+      if (role) {
+        params.FilterExpression += ' AND #role = :role';
+        params.ExpressionAttributeNames['#role'] = 'role';
+        params.ExpressionAttributeValues[':role'] = role;
+      }
+
       const command = new ScanCommand(params);
       const result = await docClient.send(command);
 
-      // Sort by postedOn (newest first)
-      const sortedJobs = result.Items.sort((a, b) => new Date(b.postedOn) - new Date(a.postedOn));
+      // Utility to unwrap DynamoDB attributes
+      function unwrap(item) {
+        const out = {};
+        for (const key in item) {
+          if (item[key] && typeof item[key] === 'object' && 'S' in item[key]) {
+            out[key] = item[key].S;
+          } else if (item[key] && typeof item[key] === 'object' && 'L' in item[key]) {
+            out[key] = item[key].L.map(unwrap);
+          } else {
+            out[key] = item[key];
+          }
+        }
+        return out;
+      }
+
+      // Unwrap all items
+      let unwrappedJobs = result.Items.map(unwrap);
+      let filteredJobs = unwrappedJobs.sort((a, b) => new Date(b.postedOn) - new Date(a.postedOn));
+
+      // Debug logging
+      console.log("Search term:", searchTerm);
+      console.log("First 3 jobs before filtering:", filteredJobs.slice(0, 3).map(j => j.role));
+
+      // Case-insensitive search filter in Node.js
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        const normalizedSearch = search.replace(/[^a-z0-9 ]/gi, '');
+        filteredJobs = filteredJobs.filter(job => {
+          if (job.role) {
+            const raw = job.role;
+            const lower = job.role.toLowerCase();
+            const norm = lower.replace(/[^a-z0-9 ]/gi, '');
+            console.log("Comparing:", raw, "| lower:", lower, "| norm:", norm, "| type:", typeof job.role, "| search:", search, "| normSearch:", normalizedSearch);
+          }
+          return (
+            (job.role && job.role.toLowerCase().replace(/[^a-z0-9 ]/gi, '').trim().includes(normalizedSearch)) ||
+            (job.companyName && job.companyName.toLowerCase().replace(/[^a-z0-9 ]/gi, '').trim().includes(normalizedSearch))
+          );
+        });
+        console.log("First 3 jobs after filtering:", filteredJobs.slice(0, 3).map(j => j.role));
+      }
 
       // Paginate
-      const paginatedJobs = sortedJobs.slice(offset, offset + parseInt(limit));
+      const paginatedJobs = filteredJobs.slice(offset, offset + parseInt(limit));
       
       const response = {
         jobs: paginatedJobs,
         pagination: {
           currentPage: parseInt(page),
-          totalPages: Math.ceil(sortedJobs.length / limit),
-          totalJobs: sortedJobs.length,
-          hasNext: offset + parseInt(limit) < sortedJobs.length,
+          totalPages: Math.ceil(filteredJobs.length / limit),
+          totalJobs: filteredJobs.length,
+          hasNext: offset + parseInt(limit) < filteredJobs.length,
           hasPrev: page > 1
         }
       };

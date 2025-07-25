@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   ArrowLeftIcon,
   MapPinIcon, 
@@ -26,6 +27,7 @@ interface JobDetailClientProps {
 
 export default function JobDetailClient({ job }: JobDetailClientProps) {
   const [showCVAnalysis, setShowCVAnalysis] = useState(false);
+  const router = useRouter();
 
   const postedDate = new Date(job.postedOn);
   const expiresDate = new Date(job.expiresOn);
@@ -77,13 +79,13 @@ export default function JobDetailClient({ job }: JobDetailClientProps) {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Button */}
           <div className="mb-6">
-            <Link 
-              href="/"
+            <button
+              onClick={() => router.back()}
               className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
             >
               <ArrowLeftIcon className="h-5 w-5" />
-              <span>Back to Jobs</span>
-            </Link>
+              <span>Back</span>
+            </button>
           </div>
 
           {/* Job Header */}

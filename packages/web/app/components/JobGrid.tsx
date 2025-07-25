@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import JobCard from './JobCard';
 import LoadingSpinner from './LoadingSpinner';
 import Pagination from './Pagination';
@@ -18,44 +18,45 @@ export default function JobGrid() {
     hasNext: false,
     hasPrev: false
   });
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchJobs = async (page = 1) => {
+  const fetchJobs = async (page = 1, append = false) => {
     try {
-      setLoading(true);
+      if (page === 1) setLoading(true);
       setError(null);
-
-      // Get current URL parameters
       const url = new URL(window.location.href);
       const params = new URLSearchParams(url.search);
       params.set('page', page.toString());
-      params.set('limit', '15');
-
+      params.set('limit', '20');
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/jobs?${params.toString()}`);
-      
-      if (response.status !==200) {
+      if (response.status !== 200) {
         throw new Error('Failed to fetch jobs');
       }
-
       const data = response.data;
-      setJobs(data.jobs || []);
+      setJobs(prev => append ? [...prev, ...(data.jobs || [])] : (data.jobs || []));
       setPagination(data.pagination || {
-        currentPage: 1,
+        currentPage: page,
         totalPages: 1,
         totalJobs: 0,
         hasNext: false,
         hasPrev: false
       });
+      setHasMore(data.pagination ? data.pagination.hasNext : false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
-      setJobs([]);
+      if (!append) setJobs([]);
     } finally {
-      setLoading(false);
+      if (page === 1) setLoading(false);
+      setIsFetchingMore(false);
     }
   };
 
   // Initial load
   useEffect(() => {
-    fetchJobs();
+    fetchJobs(1);
   }, []);
 
   // Listen for filter and search updates
@@ -63,23 +64,28 @@ export default function JobGrid() {
     const handleUpdate = () => {
       fetchJobs(1); // Reset to page 1 when filters change
     };
-
     window.addEventListener('filtersUpdate', handleUpdate);
     window.addEventListener('searchUpdate', handleUpdate);
-
     return () => {
       window.removeEventListener('filtersUpdate', handleUpdate);
       window.removeEventListener('searchUpdate', handleUpdate);
     };
   }, []);
 
-  const handlePageChange = (page: number) => {
-    fetchJobs(page);
-    // Scroll to top of job grid
-    document.getElementById('jobs')?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // Infinite scroll observer
+  const lastJobRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading || isFetchingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new window.IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setIsFetchingMore(true);
+        fetchJobs(pagination.currentPage + 1, true);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, isFetchingMore, hasMore, pagination.currentPage]);
 
-  if (loading) {
+  if (loading && jobs.length === 0) {
     return (
       <div className="flex justify-center items-center py-12">
         <LoadingSpinner />
@@ -94,7 +100,7 @@ export default function JobGrid() {
           <h3 className="text-lg font-semibold text-error-800 mb-2">Error Loading Jobs</h3>
           <p className="text-error-600 mb-4">{error}</p>
           <button
-            onClick={() => fetchJobs()}
+            onClick={() => fetchJobs(1)}
             className="btn-primary"
           >
             Try Again
@@ -143,27 +149,25 @@ export default function JobGrid() {
 
       {/* Job Cards Grid */}
       <div className="grid gap-6">
-        {jobs.map((job, index) => (
-          <div
-            key={job.jobId}
-            className="animate-fade-in"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <JobCard job={job} />
-          </div>
-        ))}
+        {jobs.map((job, index) => {
+          const isLast = index === jobs.length - 1;
+          return (
+            <div
+              key={job.jobId}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+              ref={isLast ? lastJobRef : undefined}
+            >
+              <JobCard job={job} />
+            </div>
+          );
+        })}
       </div>
 
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className="mt-8">
-          <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={handlePageChange}
-            hasNext={pagination.hasNext}
-            hasPrev={pagination.hasPrev}
-          />
+      {/* Infinite scroll loading spinner */}
+      {isFetchingMore && (
+        <div className="flex justify-center items-center py-6">
+          <LoadingSpinner />
         </div>
       )}
     </div>

@@ -10,8 +10,10 @@ import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useRouter } from 'next/navigation';
 
 export default function GovernmentJobsPage() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<SarkariJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -75,20 +77,22 @@ export default function GovernmentJobsPage() {
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen">
         {/* Sticky header with back button, heading, and filters */}
-        <div className="sticky top-0 z-10 bg-gray-50 pb-4 mb-8">
-          <div className="pt-2 mb-2">
-            <Link 
-              href="/"
+        <div className="sticky top-0 z-10 bg-gray-50 pb-4 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-2">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.back()}
               className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
             >
               <ArrowLeftIcon className="h-5 w-5" />
-              <span>Back to Home</span>
-            </Link>
+              <span>Back</span>
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Latest Government Jobs
+            </h1>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Latest Government Jobs</h1>
-          <p className="text-gray-600 mb-4">Explore the latest government (Sarkari) job opportunities across India. Updated regularly with new openings.</p>
-          {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4">
+        </div>
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex gap-4 items-end flex-wrap">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
               <select
@@ -111,14 +115,16 @@ export default function GovernmentJobsPage() {
                 className="input-field w-48"
               />
             </div>
-            {(orgFilter || dateFilter) && (
-              <button
-                className="ml-2 text-sm text-blue-600 hover:underline"
-                onClick={() => { setOrgFilter(''); setDateFilter(''); }}
-              >
-                Clear Filters
-              </button>
-            )}
+          </div>
+          <div className="flex items-end">
+            <button
+              className="ml-2 text-sm text-blue-600 hover:underline px-2 py-1"
+              style={{ minHeight: '2.25rem' }}
+              onClick={() => { setOrgFilter(''); setDateFilter(''); }}
+              disabled={!orgFilter && !dateFilter}
+            >
+              Clear All Filters
+            </button>
           </div>
         </div>
 
