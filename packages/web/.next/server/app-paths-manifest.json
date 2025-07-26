@@ -1,5 +1,1 @@
-{
-  "/government-jobs/page": "app/government-jobs/page.js",
-  "/page": "app/page.js",
-  "/jobs/category/[category]/page": "app/jobs/category/[category]/page.js"
-}
+{}

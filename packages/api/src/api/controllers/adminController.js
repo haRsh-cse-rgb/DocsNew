@@ -689,6 +689,17 @@ const adminController = {
       const totalGovtJobs = sarkariResult.Items ? sarkariResult.Items.length : 0;
       const activeGovtJobs = sarkariResult.Items ? sarkariResult.Items.filter(j => j.status === 'active').length : 0;
 
+      // Count certifications
+      let totalCertifications = 0;
+      if (process.env.CERTIFICATIONS_TABLE) {
+        const certParams = {
+          TableName: process.env.CERTIFICATIONS_TABLE,
+        };
+        const certCommand = new ScanCommand(certParams);
+        const certResult = await docClient.send(certCommand);
+        totalCertifications = certResult.Items ? certResult.Items.length : 0;
+      }
+
       // Count subscriptions
       let totalSubscriptions = 0;
       if (process.env.SUBSCRIPTIONS_TABLE) {
@@ -705,6 +716,7 @@ const adminController = {
         activePrivateJobs,
         totalGovtJobs,
         activeGovtJobs,
+        totalCertifications,
         totalSubscriptions
       });
     } catch (error) {

@@ -81,6 +81,12 @@ export default function Navbar() {
               Government Jobs
             </Link>
             <Link 
+              href="/certifications" 
+              className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
+            >
+              Certifications
+            </Link>
+            <Link 
               href="/sarkari-results" 
               className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
             >
@@ -128,12 +134,19 @@ export default function Navbar() {
                 Government Jobs
               </Link>
               <Link 
+                href="/certifications" 
+                className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Certifications
+              </Link>
+              {/* <Link 
                 href="/sarkari-results" 
                 className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Results
-              </Link>
+              </Link> */}
               <Link 
                 href="/admin/login" 
                 className="btn-primary inline-block text-center"
