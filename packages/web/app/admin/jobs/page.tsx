@@ -29,6 +29,7 @@ interface Job {
 export default function JobsManagement() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -58,20 +59,23 @@ export default function JobsManagement() {
     }
   };
 
-  const handleDeleteJob = async (jobId: string) => {
+  const handleDeleteJob = async (jobId: string, jobName: string) => {
     if (!confirm('Are you sure you want to delete this job?')) return;
 
     try {
+      setDeletingId(jobId);
       const token = localStorage.getItem('adminToken');
       await axios.delete(`/api/admin/jobs/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      toast.success('Job deleted successfully');
+      toast.success(`Job "${jobName}" deleted successfully`);
       fetchJobs();
     } catch (error) {
       console.error('Error deleting job:', error);
       toast.error('Failed to delete job');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -283,11 +287,19 @@ export default function JobsManagement() {
                             <PencilIcon className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteJob(job.jobId)}
-                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDeleteJob(job.jobId, job.role)}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Delete"
+                            disabled={deletingId === job.jobId}
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            {deletingId === job.jobId ? (
+                              <div className="flex items-center space-x-1">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                                <span className="text-xs">Deleting...</span>
+                              </div>
+                            ) : (
+                              <TrashIcon className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </td>

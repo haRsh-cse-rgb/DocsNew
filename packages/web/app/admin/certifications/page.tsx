@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { PlusIcon, PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 interface Certification {
   id: string;
@@ -19,6 +20,7 @@ interface Certification {
 export default function AdminCertificationsPage() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -40,12 +42,13 @@ export default function AdminCertificationsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (!confirm('Are you sure you want to delete this certification?')) {
       return;
     }
 
     try {
+      setDeletingId(id);
       const token = localStorage.getItem('adminToken');
       await axios.delete(`/api/certifications/${id}`, {
         headers: {
@@ -53,9 +56,12 @@ export default function AdminCertificationsPage() {
         }
       });
       setCertifications(certifications.filter(cert => cert.id !== id));
+      toast.success(`Certification "${title}" deleted successfully`);
     } catch (err) {
       console.error('Error deleting certification:', err);
-      alert('Failed to delete certification');
+      toast.error('Failed to delete certification');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -184,11 +190,19 @@ export default function AdminCertificationsPage() {
                             <PencilIcon className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(certification.id)}
-                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDelete(certification.id, certification.title)}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Delete"
+                            disabled={deletingId === certification.id}
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            {deletingId === certification.id ? (
+                              <div className="flex items-center space-x-1">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                                <span className="text-xs">Deleting...</span>
+                              </div>
+                            ) : (
+                              <TrashIcon className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </td>

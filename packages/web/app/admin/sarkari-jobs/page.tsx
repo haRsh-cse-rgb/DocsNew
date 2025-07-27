@@ -31,6 +31,7 @@ interface SarkariJob {
 export default function SarkariJobsManagement() {
   const [jobs, setJobs] = useState<SarkariJob[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterOrganization, setFilterOrganization] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -60,20 +61,23 @@ export default function SarkariJobsManagement() {
     }
   };
 
-  const handleDeleteJob = async (jobId: string) => {
+  const handleDeleteJob = async (jobId: string, jobName: string) => {
     if (!confirm('Are you sure you want to delete this government job?')) return;
 
     try {
+      setDeletingId(jobId);
       const token = localStorage.getItem('adminToken');
       await axios.delete(`/api/admin/sarkari-jobs/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
-      toast.success('Government job deleted successfully');
+      toast.success(`Government job "${jobName}" deleted successfully`);
       fetchJobs();
     } catch (error) {
       console.error('Error deleting sarkari job:', error);
       toast.error('Failed to delete government job');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -274,11 +278,19 @@ export default function SarkariJobsManagement() {
                             <PencilIcon className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteJob(job.jobId)}
-                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDeleteJob(job.jobId, job.postName)}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="Delete"
+                            disabled={deletingId === job.jobId}
                           >
-                            <TrashIcon className="h-4 w-4" />
+                            {deletingId === job.jobId ? (
+                              <div className="flex items-center space-x-1">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                                <span className="text-xs">Deleting...</span>
+                              </div>
+                            ) : (
+                              <TrashIcon className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </td>

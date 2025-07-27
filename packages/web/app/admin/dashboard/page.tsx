@@ -24,11 +24,11 @@ export default function AdminDashboard() {
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [activityPage, setActivityPage] = useState(1);
-  const [activityTotalPages, setActivityTotalPages] = useState(1);
-  const [activityTotal, setActivityTotal] = useState(0);
-  const [activityLoading, setActivityLoading] = useState(false);
+  // const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  // const [activityPage, setActivityPage] = useState(1);
+  // const [activityTotalPages, setActivityTotalPages] = useState(1);
+  // const [activityTotal, setActivityTotal] = useState(0);
+  // const [activityLoading, setActivityLoading] = useState(false);
   const [showCreateAdminModal, setShowCreateAdminModal] = useState(false);
   const [newAdmin, setNewAdmin] = useState({ email: '', password: '', role: 'admin' });
   const [creatingAdmin, setCreatingAdmin] = useState(false);
@@ -71,28 +71,28 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  useEffect(() => {
-    const fetchRecentActivity = async () => {
-      try {
-        setActivityLoading(true);
-        const token = localStorage.getItem('adminToken');
-        if (!token) return;
-        const response = await axios.get(`/api/admin/recent-activity?page=${activityPage}&limit=20`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setRecentActivity(response.data.activities);
-        setActivityTotalPages(response.data.totalPages);
-        setActivityTotal(response.data.total);
-      } catch (error) {
-        setRecentActivity([]);
-        setActivityTotalPages(1);
-        setActivityTotal(0);
-      } finally {
-        setActivityLoading(false);
-      }
-    };
-    fetchRecentActivity();
-  }, [activityPage]);
+  // useEffect(() => {
+  //   const fetchRecentActivity = async () => {
+  //     try {
+  //       setActivityLoading(true);
+  //       const token = localStorage.getItem('adminToken');
+  //       if (!token) return;
+  //       const response = await axios.get(`/api/admin/recent-activity?page=${activityPage}&limit=20`, {
+  //         headers: { Authorization: `Bearer ${token}` }
+  //       });
+  //       setRecentActivity(response.data.activities);
+  //       setActivityTotalPages(response.data.totalPages);
+  //       setActivityTotal(response.data.total);
+  //     } catch (error) {
+  //       setRecentActivity([]);
+  //       setActivityTotalPages(1);
+  //       setActivityTotal(0);
+  //     } finally {
+  //       setActivityLoading(false);
+  //     }
+  //   };
+  //   fetchRecentActivity();
+  // }, [activityPage]);
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
@@ -141,6 +141,13 @@ export default function AdminDashboard() {
       icon: AcademicCapIcon,
       href: '/admin/certifications',
       color: 'bg-purple-500'
+    },
+    {
+      title: 'Internships',
+      description: 'Manage internship opportunities',
+      icon: BriefcaseIcon,
+      href: '/admin/internships',
+      color: 'bg-pink-500'
     }
   ];
 
@@ -326,67 +333,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-            <span className="text-xs text-gray-500">Total: {activityTotal}</span>
-          </div>
-          <div className="p-6 overflow-x-auto">
-            {activityLoading ? (
-              <div className="text-center py-8 text-gray-500">Loading...</div>
-            ) : recentActivity.length === 0 ? (
-              <p className="text-gray-600 text-center py-8">
-                No recent activity to display
-              </p>
-            ) : (
-              <>
-                <table className="min-w-full divide-y divide-gray-200 mb-4">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target Type</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Target ID</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin Email</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {recentActivity.map((activity, idx) => (
-                      <tr key={activity.id || idx}>
-                        <td className="px-4 py-2 whitespace-nowrap font-semibold text-blue-700">{activity.action}</td>
-                        <td className="px-4 py-2 whitespace-nowrap">{activity.targetType}</td>
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-600">{activity.targetId}</td>
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-900">{activity.adminEmail}</td>
-                        <td className="px-4 py-2 whitespace-nowrap text-gray-500">{activity.timestamp ? new Date(activity.timestamp).toLocaleString() : ''}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {/* Pagination Controls */}
-                <div className="flex justify-center items-center space-x-2">
-                  <button
-                    className="px-3 py-1 rounded border text-sm disabled:opacity-50"
-                    onClick={() => setActivityPage(p => Math.max(1, p - 1))}
-                    disabled={activityPage === 1}
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-gray-700">
-                    Page {activityPage} of {activityTotalPages}
-                  </span>
-                  <button
-                    className="px-3 py-1 rounded border text-sm disabled:opacity-50"
-                    onClick={() => setActivityPage(p => Math.min(activityTotalPages, p + 1))}
-                    disabled={activityPage === activityTotalPages}
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+        {/* Recent Activity - Commented out for now */}
       </main>
     </div>
   );

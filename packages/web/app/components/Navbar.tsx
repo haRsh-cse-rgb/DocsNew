@@ -9,6 +9,23 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [showCategories, setShowCategories] = useState(false);
+  const [showInternshipCategories, setShowInternshipCategories] = useState(false);
+  
+  // Internship categories - same as in InternshipFilters
+  const internshipCategories = [
+    'Software Development',
+    'Data Science',
+    'Marketing',
+    'Finance',
+    'Design',
+    'Sales',
+    'HR',
+    'Operations',
+    'Research',
+    'Content Writing',
+    'Business Development',
+    'Product Management'
+  ];
 
   useEffect(() => {
     // Fetch categories from backend
@@ -23,6 +40,22 @@ export default function Navbar() {
       }
     }
     fetchCategories();
+  }, []);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.relative')) {
+        setShowCategories(false);
+        setShowInternshipCategories(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   return (
@@ -81,12 +114,38 @@ export default function Navbar() {
               Government Jobs
             </Link>
             <Link 
-              href="/certifications" 
+                            href="/certifications"
               className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
             >
               Certifications
             </Link>
-            <Link 
+            <div className="relative">
+              <button
+                className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 flex items-center space-x-1"
+                onClick={() => setShowInternshipCategories((v) => !v)}
+                type="button"
+              >
+                Internships
+                <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              {showInternshipCategories && (
+                <div
+                  className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
+                >
+                  {internshipCategories.map((cat) => (
+                    <Link
+                      key={cat}
+                      href={`/internships/category/${encodeURIComponent(cat)}`}
+                      className="block px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                      onClick={() => setShowInternshipCategories(false)}
+                    >
+                      {cat}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <Link
               href="/sarkari-results" 
               className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
             >
@@ -139,6 +198,13 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Certifications
+              </Link>
+              <Link 
+                href="/internships" 
+                className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Internships
               </Link>
               {/* <Link 
                 href="/sarkari-results" 

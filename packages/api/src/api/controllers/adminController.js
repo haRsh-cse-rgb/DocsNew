@@ -242,61 +242,127 @@ const adminController = {
       }
 
       const existingJob = scanResult.Items[0];
+      const newCategory = updates.category;
+      const oldCategory = existingJob.category;
 
-      // Build update expression
-      let updateExpression = 'SET ';
-      const expressionAttributeNames = {};
-      const expressionAttributeValues = {};
-      
-      Object.keys(updates).forEach((key, index) => {
-        if (key !== 'jobId' && key !== 'category') { // Don't update keys
-          updateExpression += `#${key} = :${key}`;
-          if (index < Object.keys(updates).length - 1) updateExpression += ', ';
-          expressionAttributeNames[`#${key}`] = key;
-          expressionAttributeValues[`:${key}`] = updates[key];
-        }
-      });
+      // Check if category is being changed
+      if (newCategory && newCategory !== oldCategory) {
+        // Category is changing - we need to create a new item and delete the old one
+        console.log(`Moving job ${id} from category "${oldCategory}" to "${newCategory}"`);
+        
+        // Create new item with updated category
+        const newJobData = {
+          ...existingJob,
+          ...updates,
+          category: newCategory // Ensure the new category is set
+        };
 
-      const params = {
-        TableName: process.env.JOBS_TABLE,
-        Key: {
-          category: existingJob.category,
-          jobId: id
-        },
-        UpdateExpression: updateExpression,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: expressionAttributeValues,
-        ReturnValues: 'ALL_NEW'
-      };
+        // Put the new item
+        const putParams = {
+          TableName: process.env.JOBS_TABLE,
+          Item: newJobData
+        };
+        const putCommand = new PutCommand(putParams);
+        await docClient.send(putCommand);
 
-      const command = new UpdateCommand(params);
-      const result = await docClient.send(command);
-      // Log activity
-      if (req.admin && req.admin.email) {
-        await logActivity({
-          action: 'updated',
-          targetType: 'job',
-          targetId: id,
-          adminEmail: req.admin.email,
-        });
-      }
-
-      // Invalidate Redis cache for this job and all jobs lists
-      try {
-        // Delete job detail cache
-        await redisClient.del(`job:${id}`);
-        // Delete all jobs list caches (keys starting with jobs:)
-        if (redisClient.keys) {
-          const keys = await redisClient.keys('jobs:*');
-          if (Array.isArray(keys) && keys.length > 0) {
-            await redisClient.del(keys);
+        // Delete the old item
+        const deleteParams = {
+          TableName: process.env.JOBS_TABLE,
+          Key: {
+            category: oldCategory,
+            jobId: id
           }
-        }
-      } catch (cacheErr) {
-        console.warn('Failed to invalidate jobs cache:', cacheErr);
-      }
+        };
+        const deleteCommand = new DeleteCommand(deleteParams);
+        await docClient.send(deleteCommand);
 
-      res.json({ message: 'Job updated successfully', job: result.Attributes });
+        // Log activity
+        if (req.admin && req.admin.email) {
+          await logActivity({
+            action: 'updated',
+            targetType: 'job',
+            targetId: id,
+            adminEmail: req.admin.email,
+          });
+        }
+
+        // Invalidate Redis cache for this job and all jobs lists
+        try {
+          // Delete job detail cache
+          await redisClient.del(`job:${id}`);
+          // Delete all jobs list caches (keys starting with jobs:)
+          if (redisClient.keys) {
+            const keys = await redisClient.keys('jobs:*');
+            if (Array.isArray(keys) && keys.length > 0) {
+              await redisClient.del(keys);
+            }
+          }
+        } catch (cacheErr) {
+          console.warn('Failed to invalidate jobs cache:', cacheErr);
+        }
+
+        res.json({ 
+          message: `Job updated successfully and moved from "${oldCategory}" to "${newCategory}"`, 
+          job: newJobData 
+        });
+      } else {
+        // Category is not changing - do normal update
+        // Build update expression
+        let updateExpression = 'SET ';
+        const expressionAttributeNames = {};
+        const expressionAttributeValues = {};
+        
+        Object.keys(updates).forEach((key, index) => {
+          if (key !== 'jobId' && key !== 'category') { // Don't update keys
+            updateExpression += `#${key} = :${key}`;
+            if (index < Object.keys(updates).length - 1) updateExpression += ', ';
+            expressionAttributeNames[`#${key}`] = key;
+            expressionAttributeValues[`:${key}`] = updates[key];
+          }
+        });
+
+        const params = {
+          TableName: process.env.JOBS_TABLE,
+          Key: {
+            category: existingJob.category,
+            jobId: id
+          },
+          UpdateExpression: updateExpression,
+          ExpressionAttributeNames: expressionAttributeNames,
+          ExpressionAttributeValues: expressionAttributeValues,
+          ReturnValues: 'ALL_NEW'
+        };
+
+        const command = new UpdateCommand(params);
+        const result = await docClient.send(command);
+        
+        // Log activity
+        if (req.admin && req.admin.email) {
+          await logActivity({
+            action: 'updated',
+            targetType: 'job',
+            targetId: id,
+            adminEmail: req.admin.email,
+          });
+        }
+
+        // Invalidate Redis cache for this job and all jobs lists
+        try {
+          // Delete job detail cache
+          await redisClient.del(`job:${id}`);
+          // Delete all jobs list caches (keys starting with jobs:)
+          if (redisClient.keys) {
+            const keys = await redisClient.keys('jobs:*');
+            if (Array.isArray(keys) && keys.length > 0) {
+              await redisClient.del(keys);
+            }
+          }
+        } catch (cacheErr) {
+          console.warn('Failed to invalidate jobs cache:', cacheErr);
+        }
+
+        res.json({ message: 'Job updated successfully', job: result.Attributes });
+      }
     } catch (error) {
       console.error('Error updating job:', error);
       res.status(500).json({ error: 'Failed to update job' });

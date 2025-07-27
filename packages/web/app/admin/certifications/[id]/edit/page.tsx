@@ -21,6 +21,7 @@ export default function EditCertificationPage() {
     category: '',
     link: ''
   });
+  const [customCategory, setCustomCategory] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +61,12 @@ export default function EditCertificationPage() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.put(`/api/certifications/${id}`, formData, {
+      const finalFormData = {
+        ...formData,
+        category: formData.category === 'Other' ? customCategory : formData.category
+      };
+      
+      await axios.put(`/api/certifications/${id}`, finalFormData, {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
@@ -79,6 +85,10 @@ export default function EditCertificationPage() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleCustomCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomCategory(e.target.value);
   };
 
   if (loading) {
@@ -177,6 +187,28 @@ export default function EditCertificationPage() {
               </select>
             </div>
 
+            {/* Custom Category Input - Only show when "Other" is selected */}
+            {formData.category === 'Other' && (
+              <div className="animate-fadeIn">
+                <label htmlFor="customCategory" className="block text-sm font-medium text-gray-700 mb-2">
+                  Custom Category Name *
+                </label>
+                <input
+                  type="text"
+                  id="customCategory"
+                  name="customCategory"
+                  value={customCategory}
+                  onChange={handleCustomCategoryChange}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Blockchain, IoT, Mobile Development"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Enter the name of your custom category
+                </p>
+              </div>
+            )}
+
             {/* Link */}
             <div>
               <label htmlFor="link" className="block text-sm font-medium text-gray-700 mb-2">
@@ -201,7 +233,7 @@ export default function EditCertificationPage() {
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || (formData.category === 'Other' && !customCategory.trim())}
                 className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
                 {saving ? 'Updating...' : 'Update Certification'}
