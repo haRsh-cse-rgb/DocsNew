@@ -149,7 +149,7 @@ exports.getInternshipById = async (req, res) => {
 // Create new internship
 exports.createInternship = async (req, res) => {
   try {
-    const { title, company, location, startDate, endDate, stipend, duration, applyLink, description, skills, category } = req.body;
+    const { title, company, location, startDate, endDate, stipend, duration, applyLink, description, skills, category, batch } = req.body;
 
     if (!title || !company || !location || !applyLink || !category) {
       return res.status(400).json({
@@ -178,6 +178,7 @@ exports.createInternship = async (req, res) => {
       description: description || '',
       skills: Array.isArray(skills) ? skills : (skills ? skills.split(',').map(s => s.trim()) : []),
       category,
+      batch: Array.isArray(batch) ? batch : (batch ? batch.split(',').map(b => b.trim()) : []),
       postedAt: now,
       lastUpdated: now,
       isActive: true
@@ -287,10 +288,14 @@ exports.updateInternship = async (req, res) => {
       
       Object.keys(updates).forEach((key, index) => {
         if (key !== 'id' && key !== 'category') { // Don't update keys
+          let value = updates[key];
+          if (key === 'batch') {
+            value = Array.isArray(value) ? value : (value ? value.split(',').map(b => b.trim()) : []);
+          }
           updateExpression += `#${key} = :${key}`;
           if (index < Object.keys(updates).length - 1) updateExpression += ', ';
           expressionAttributeNames[`#${key}`] = key;
-          expressionAttributeValues[`:${key}`] = updates[key];
+          expressionAttributeValues[`:${key}`] = value;
         }
       });
 
@@ -484,6 +489,7 @@ exports.bulkUploadInternships = async (req, res) => {
                 description: row.description || '',
                 skills: row.skills ? row.skills.split(',').map(s => s.trim()) : [],
                 category: row.category.trim(),
+                batch: row.batch ? row.batch.split(',').map(b => b.trim()) : [],
                 postedAt: now,
                 lastUpdated: now,
                 isActive: true

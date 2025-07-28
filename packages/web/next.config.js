@@ -3,7 +3,6 @@ const nextConfig = {
   images: {
     domains: [
       'images.pexels.com',
-      'via.placeholder.com',
       'technocorps.com',
       'logo.clearbit.com',
       'example.com',

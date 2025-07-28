@@ -10,25 +10,26 @@ export default function Navbar() {
   const [categories, setCategories] = useState<string[]>([]);
   const [showCategories, setShowCategories] = useState(false);
   const [showInternshipCategories, setShowInternshipCategories] = useState(false);
+  const [internshipCategories, setInternshipCategories] = useState<string[]>([]);
   
   // Internship categories - same as in InternshipFilters
-  const internshipCategories = [
-    'Software Development',
-    'Data Science',
-    'Marketing',
-    'Finance',
-    'Design',
-    'Sales',
-    'HR',
-    'Operations',
-    'Research',
-    'Content Writing',
-    'Business Development',
-    'Product Management'
-  ];
+  // const internshipCategories = [
+  //   'Software Development',
+  //   'Data Science',
+  //   'Marketing',
+  //   'Finance',
+  //   'Design',
+  //   'Sales',
+  //   'HR',
+  //   'Operations',
+  //   'Research',
+  //   'Content Writing',
+  //   'Business Development',
+  //   'Product Management'
+  // ];
 
   useEffect(() => {
-    // Fetch categories from backend
+    // Fetch categories from backend for jobs
     async function fetchCategories() {
       try {
         const response = await axios.get('/api/jobs?limit=1000'); // adjust as needed
@@ -40,6 +41,21 @@ export default function Navbar() {
       }
     }
     fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    // Fetch categories from backend for internships
+    async function fetchInternshipCategories() {
+      try {
+        const response = await axios.get('/api/internships?limit=1000');
+        const internships: any[] = response.data.internships || [];
+        const uniqueCategories: string[] = Array.from(new Set(internships.map((i: any) => i.category).filter((cat: any): cat is string => typeof cat === 'string' && !!cat)));
+        setInternshipCategories(uniqueCategories);
+      } catch (err) {
+        setInternshipCategories([]);
+      }
+    }
+    fetchInternshipCategories();
   }, []);
 
   // Close dropdowns when clicking outside
@@ -132,16 +148,20 @@ export default function Navbar() {
                 <div
                   className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
                 >
-                  {internshipCategories.map((cat) => (
-                    <Link
-                      key={cat}
-                      href={`/internships/category/${encodeURIComponent(cat)}`}
-                      className="block px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
-                      onClick={() => setShowInternshipCategories(false)}
-                    >
-                      {cat}
-                    </Link>
-                  ))}
+                  {internshipCategories.length === 0 ? (
+                    <div className="px-4 py-2 text-gray-500">No categories</div>
+                  ) : (
+                    internshipCategories.map((cat) => (
+                      <Link
+                        key={cat}
+                        href={`/internships/category/${encodeURIComponent(cat)}`}
+                        className="block px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+                        onClick={() => setShowInternshipCategories(false)}
+                      >
+                        {cat}
+                      </Link>
+                    ))
+                  )}
                 </div>
               )}
             </div>

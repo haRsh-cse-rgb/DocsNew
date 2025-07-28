@@ -11,10 +11,10 @@ const docClient = DynamoDBDocumentClient.from(dynamoClient);
 const aiController = {
   async analyzeCv(req, res) {
     try {
-      const { jobId, cvS3Key } = req.body;
+      const { jobId, internshipId, cvS3Key } = req.body;
 
-      if (!jobId || !cvS3Key) {
-        return res.status(400).json({ error: 'jobId and cvS3Key are required' });
+      if ((!jobId && !internshipId) || !cvS3Key) {
+        return res.status(400).json({ error: 'jobId or internshipId and cvS3Key are required' });
       }
 
       // Only allow PDF files
@@ -22,23 +22,65 @@ const aiController = {
         return res.status(400).json({ error: 'Only PDF files are supported for CV analysis.' });
       }
 
-      // Fetch job details from DynamoDB
-      const jobParams = {
-        TableName: process.env.JOBS_TABLE,
-        FilterExpression: 'jobId = :jobId',
-        ExpressionAttributeValues: {
-          ':jobId': jobId
+      let job, isInternship = false;
+
+      if (internshipId) {
+        console.log('Looking for internship with ID:', internshipId);
+        console.log('Using table:', process.env.INTERNSHIPS_TABLE);
+        
+        // Fetch internship details from DynamoDB
+        const internshipParams = {
+          TableName: process.env.INTERNSHIPS_TABLE,
+          FilterExpression: 'id = :id',
+          ExpressionAttributeValues: {
+            ':id': internshipId
+          }
+        };
+
+        console.log('Internship search params:', internshipParams);
+
+        const internshipCommand = new ScanCommand(internshipParams);
+        const internshipResult = await docClient.send(internshipCommand);
+
+        console.log('Internship search result:', internshipResult);
+
+        if (!internshipResult.Items || internshipResult.Items.length === 0) {
+          console.log('No internship found with ID:', internshipId);
+          return res.status(404).json({ error: 'Internship not found' });
         }
-      };
 
-      const jobCommand = new ScanCommand(jobParams);
-      const jobResult = await docClient.send(jobCommand);
+        job = internshipResult.Items[0];
+        isInternship = true;
+        console.log('Found internship:', job);
+      } else {
+        console.log('Looking for job with ID:', jobId);
+        console.log('Using table:', process.env.JOBS_TABLE);
+        console.log('All environment variables:', Object.keys(process.env).filter(key => key.includes('TABLE')));
+        
+        // Fetch job details from DynamoDB
+        const jobParams = {
+          TableName: process.env.JOBS_TABLE,
+          FilterExpression: 'jobId = :jobId',
+          ExpressionAttributeValues: {
+            ':jobId': jobId
+          }
+        };
 
-      if (!jobResult.Items || jobResult.Items.length === 0) {
-        return res.status(404).json({ error: 'Job not found' });
+        console.log('Job search params:', jobParams);
+
+        const jobCommand = new ScanCommand(jobParams);
+        const jobResult = await docClient.send(jobCommand);
+
+        console.log('Job search result:', jobResult);
+
+        if (!jobResult.Items || jobResult.Items.length === 0) {
+          console.log('No job found with ID:', jobId);
+          return res.status(404).json({ error: 'Job not found' });
+        }
+
+        job = jobResult.Items[0];
+        console.log('Found job:', job);
       }
-
-      const job = jobResult.Items[0];
 
       // Fetch CV from S3
       const s3Params = {
@@ -63,18 +105,19 @@ const aiController = {
         You are an expert resume reviewer. Your job is to strictly analyze only CVs/resumes. If the uploaded document is not a CV or resume (for example, if it is a cover letter, application letter, or any other document), do NOT produce any analysis or score. Instead, return this JSON:
         { "error": "Please upload a CV or resume, not other document." }
 
-        If the document is a CV/resume, analyze it against the following job description and provide a STRICT, realistic, and critical review. Do not give high scores easily. Only give high compatibility if the CV is truly an excellent match. Provide detailed, actionable, and honest suggestions for improvement.
+        If the document is a CV/resume, analyze it against the following ${isInternship ? 'internship' : 'job'} description and provide a STRICT, realistic, and critical review. Do not give high scores easily. Only give high compatibility if the CV is truly an excellent match. Provide detailed, actionable, and honest suggestions for improvement.
 
         For each area to improve, if a specific line or bullet point in the CV needs improvement, quote the original line as 'originalLine' and provide a rewritten improved version as 'improvedLine'. If the improvement is not line-specific, provide a clear and actionable suggestion as a string.
 
         For the 'improvements' array, do not be generic. Give very specific, actionable suggestions tailored to the actual content of the uploaded CV. Reference the actual lines or sections that need improvement and explain exactly what to change or add.
 
-        JOB DETAILS:
-        Role: ${job.role}
-        Company: ${job.companyName}
+        ${isInternship ? 'INTERNSHIP' : 'JOB'} DETAILS:
+        ${isInternship ? `Title: ${job.title}` : `Role: ${job.role}`}
+        Company: ${job.companyName || job.company}
         Location: ${job.location}
-        Job Description: ${job.jobDescription}
-        Required Skills/Tags: ${Array.isArray(job.tags) ? job.tags.join(', ') : typeof job.tags === 'string' ? job.tags : 'Not specified'}
+        ${isInternship ? 'Internship' : 'Job'} Description: ${job.jobDescription || job.description}
+        Required Skills/Tags: ${Array.isArray(job.tags || job.skills) ? (job.tags || job.skills).join(', ') : typeof (job.tags || job.skills) === 'string' ? (job.tags || job.skills) : 'Not specified'}
+        ${isInternship ? `Batch: ${Array.isArray(job.batch) ? job.batch.join(', ') : typeof job.batch === 'string' ? job.batch : 'Not specified'}` : ''}
 
         CV CONTENT:
         ${cvContent}
@@ -82,10 +125,10 @@ const aiController = {
         Please provide a JSON response with the following structure:
         {
           "compatibilityScore": <number between 0-100>,
-          "strengths": [<array of key strengths that match the job>],
+          "strengths": [<array of key strengths that match the ${isInternship ? 'internship' : 'job'}>],
           "weaknesses": [<array of objects, each with 'originalLine' and 'improvedLine' properties, or a string if not line-specific>],
           "improvements": [<array of specific, actionable suggestions tailored to this CV>],
-          "matchingSkills": [<array of skills from CV that match job requirements>],
+          "matchingSkills": [<array of skills from CV that match ${isInternship ? 'internship' : 'job'} requirements>],
           "missingSkills": [<array of important skills missing from CV>]
         }
       `;
@@ -94,7 +137,7 @@ const aiController = {
       const geminiResponse = await callGeminiAPI(prompt);
 
       // Get suggested jobs based on CV analysis
-      const suggestedJobs = await getSuggestedJobs(geminiResponse.matchingSkills, jobId);
+      const suggestedJobs = isInternship ? [] : await getSuggestedJobs(geminiResponse.matchingSkills, jobId);
 
       const response = {
         analysis: geminiResponse,
@@ -269,5 +312,7 @@ async function getSuggestedJobs(matchingSkills, currentJobId) {
     return [];
   }
 }
+
+
 
 module.exports = aiController;

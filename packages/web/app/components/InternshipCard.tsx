@@ -1,6 +1,16 @@
 'use client';
 
-import { ArrowTopRightOnSquareIcon, MapPinIcon, CalendarIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { 
+  MapPinIcon, 
+  CurrencyDollarIcon, 
+  CalendarIcon,
+  ArrowTopRightOnSquareIcon,
+  BuildingOfficeIcon
+} from '@heroicons/react/24/outline';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Internship {
   id: string;
@@ -18,6 +28,7 @@ interface Internship {
   category: string;
   postedAt: string;
   isActive: boolean;
+  batch: string[];
 }
 
 interface InternshipCardProps {
@@ -25,124 +36,117 @@ interface InternshipCardProps {
 }
 
 export default function InternshipCard({ internship }: InternshipCardProps) {
-  const handleCardClick = () => {
-    window.open(internship.applyLink, '_blank', 'noopener,noreferrer');
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Not specified';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const formatPostedDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  let timeAgo = 'Unknown';
+  if (internship.postedAt) {
+    const postedDate = new Date(internship.postedAt);
+    if (!isNaN(postedDate.getTime())) {
+      timeAgo = formatDistanceToNow(postedDate, { addSuffix: true });
+    }
+  }
 
   return (
-    <div
-      className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-100 flex flex-col w-full group overflow-hidden relative"
-      style={{ minHeight: 400 }}
-      onClick={handleCardClick}
-    >
-      {/* Category Badge */}
-      <div className="absolute top-4 left-4 z-10">
-        <span className="inline-block bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-sm">
-          {internship.category}
-        </span>
-      </div>
-
-      {/* Company Logo Section */}
-      <div className="bg-gradient-to-br from-purple-50 to-pink-100 p-6 flex items-center justify-center">
-        <div className="relative">
-          <img
-            src={internship.companyLogo}
-            alt={`${internship.company} logo`}
-            className="h-20 w-20 object-cover rounded-2xl border-4 border-white shadow-lg group-hover:scale-110 transition-transform duration-300"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder-logo.svg';
-            }}
-          />
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-2xl bg-purple-400 opacity-20 blur-xl group-hover:opacity-30 transition-opacity duration-300"></div>
-        </div>
-      </div>
-
-      {/* Content Section */}
-      <div className="flex-1 flex flex-col p-6">
-        {/* Title */}
-        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-purple-700 transition-colors leading-tight">
-          {internship.title}
-        </h3>
-
-        {/* Company */}
-        <p className="text-gray-600 text-sm mb-3 flex items-center">
-          <span className="font-medium text-gray-800">{internship.company}</span>
-        </p>
-
-        {/* Location */}
-        <div className="flex items-center text-gray-500 text-sm mb-2">
-          <MapPinIcon className="h-4 w-4 mr-1" />
-          <span>{internship.location}</span>
-        </div>
-
-        {/* Duration */}
-        <div className="flex items-center text-gray-500 text-sm mb-2">
-          <CalendarIcon className="h-4 w-4 mr-1" />
-          <span>{internship.duration}</span>
-        </div>
-
-        {/* Stipend */}
-        <div className="flex items-center text-gray-500 text-sm mb-3">
-          <CurrencyDollarIcon className="h-4 w-4 mr-1" />
-          <span>{internship.stipend}</span>
-        </div>
-
-        {/* Skills */}
-        {internship.skills && internship.skills.length > 0 && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-1">
-              {internship.skills.slice(0, 3).map((skill, index) => (
-                <span 
-                  key={index} 
-                  className="inline-block bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full"
-                >
-                  {skill}
-                </span>
-              ))}
-              {internship.skills.length > 3 && (
-                <span className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                  +{internship.skills.length - 3} more
-                </span>
-              )}
-            </div>
+    <div className="card hover:shadow-lg transition-all duration-300 group">
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Company Logo */}
+        {internship.company ? (
+          <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
+            <Image
+              src={
+                internship.companyLogo ||
+                (internship.company
+                  ? `https://logo.clearbit.com/${internship.company.toLowerCase().replace(/\s+/g, '')}.com`
+                  : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjM0I4MkY2Ii8+Cjx0ZXh0IHg9IjMyIiB5PSIzOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkk8L3RleHQ+Cjwvc3ZnPgo=')
+              }
+              alt={`${internship.company || 'Internship'} logo`}
+              width={64}
+              height={64}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjM0I4MkY2Ii8+Cjx0ZXh0IHg9IjMyIiB5PSIzOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkk8L3RleHQ+Cjwvc3ZnPgo=';
+              }}
+            />
+          </div>
+        ) : (
+          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+            <BuildingOfficeIcon className="h-8 w-8 text-gray-400" />
           </div>
         )}
 
-        {/* Posted Date */}
-        <p className="text-gray-400 text-xs mb-4 flex items-center">
-          <span>Posted {formatPostedDate(internship.postedAt)}</span>
-        </p>
+        {/* Internship Details */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors duration-200">
+                <Link href={`/internships/${internship.id}`}>
+                  {internship.title}
+                </Link>
+              </h3>
+              <p className="text-lg text-gray-700 font-medium">{internship.company}</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="badge-primary">{internship.category}</span>
+              <span className={`badge ${internship.isActive ? 'badge-success' : 'badge-error'}`}>
+                {internship.isActive ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          </div>
 
-        {/* Action Button */}
-        <div className="mt-auto">
-          <button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 transform group-hover:scale-105 shadow-lg group-hover:shadow-xl flex items-center justify-center">
-            <span>Apply Now</span>
-            <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-          </button>
+          {/* Batch Information */}
+          {internship.batch && internship.batch.length > 0 && (
+            <div className="mb-4">
+              <span className="text-sm text-gray-600">Suitable for: </span>
+              {internship.batch.map((year, index) => (
+                <span key={index} className="badge-warning text-xs ml-1">
+                  {year} batch
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Internship Meta Information */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
+            <div className="flex items-center space-x-1">
+              <MapPinIcon className="h-4 w-4" />
+              <span>{internship.location}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <CurrencyDollarIcon className="h-4 w-4" />
+              <span>{internship.stipend}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <CalendarIcon className="h-4 w-4" />
+              <span>{internship.duration}</span>
+            </div>
+          </div>
+
+          {/* Skills */}
+          {internship.skills && internship.skills.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {internship.skills.slice(0, 5).map((skill, index) => (
+                <span key={index} className="badge-secondary text-xs">
+                  {skill}
+                </span>
+              ))}
+              {internship.skills.length > 5 && (
+                <span className="badge-secondary text-xs">
+                  +{internship.skills.length - 5} more
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href={`/internships/${internship.id}`}
+              className="btn-secondary flex items-center justify-center flex-1"
+            >
+              View Details
+            </Link>
+          </div>
         </div>
       </div>
-
-      {/* Hover overlay effect */}
-      <div className="absolute inset-0 bg-gradient-to-t from-purple-600/0 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
     </div>
   );
 } 

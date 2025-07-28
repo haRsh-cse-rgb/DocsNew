@@ -19,6 +19,7 @@ interface CVAnalysisModalProps {
   isOpen: boolean;
   onClose: () => void;
   job: Job;
+  isInternship?: boolean;
 }
 
 interface WeaknessObject {
@@ -48,7 +49,7 @@ interface SuggestedJob {
   matchScore: number;
 }
 
-export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModalProps) {
+export default function CVAnalysisModal({ isOpen, onClose, job, isInternship = false }: CVAnalysisModalProps) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -101,7 +102,7 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
 
       // Step 3: Analyze CV
       const analysisResponse = await axios.post('/api/ai/analyze-cv', {
-        jobId: job.jobId,
+        ...(isInternship ? { internshipId: job.jobId } : { jobId: job.jobId }),
         cvS3Key: key,
       });
 
@@ -115,13 +116,20 @@ export default function CVAnalysisModal({ isOpen, onClose, job }: CVAnalysisModa
       if (
         axios.isAxiosError(error) &&
         error.response &&
-        (typeof error.response.data === 'string' || error.response.data?.message)
+        error.response.data
       ) {
-        toast.error(
-          typeof error.response.data === 'string'
-            ? error.response.data
-            : error.response.data.message
-        );
+        // Handle different error response formats
+        let errorMessage = 'CV analysis failed';
+        
+        if (typeof error.response.data === 'string') {
+          errorMessage = error.response.data;
+        } else if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+        } else if (error.response.data.message) {
+          errorMessage = error.response.data.message;
+        }
+        
+        toast.error(errorMessage);
       } else {
         toast.error(error instanceof Error ? error.message : 'Analysis failed');
       }

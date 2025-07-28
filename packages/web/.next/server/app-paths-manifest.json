@@ -1,7 +1,8 @@
 {
-  "/admin/dashboard/page": "app/admin/dashboard/page.js",
   "/page": "app/page.js",
-  "/certifications/page": "app/certifications/page.js",
-  "/admin/certifications/page": "app/admin/certifications/page.js",
-  "/admin/certifications/new/page": "app/admin/certifications/new/page.js"
+  "/jobs/category/[category]/page": "app/jobs/category/[category]/page.js",
+  "/jobs/[id]/page": "app/jobs/[id]/page.js",
+  "/api/ai/analyze-cv/route": "app/api/ai/analyze-cv/route.js",
+  "/internships/[id]/page": "app/internships/[id]/page.js",
+  "/internships/category/[category]/page": "app/internships/category/[category]/page.js"
 }
