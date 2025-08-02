@@ -80,11 +80,11 @@ export default function JobDetailClient({ job }: JobDetailClientProps) {
           {/* Back Button */}
           <div className="mb-6">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/')}
               className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
             >
               <ArrowLeftIcon className="h-5 w-5" />
-              <span>Back</span>
+              <span>Back to Home</span>
             </button>
           </div>
 

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import axios from 'axios';
 import { BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 
 function parseDelimited(str?: string): Array<{ category: string; value: string }> {
   if (!str) return [];
@@ -35,16 +37,19 @@ export default async function GovernmentJobDetailPage({ params }: { params: { id
   const eligibilityBullets = job.eligibility && job.eligibility.includes(';') ? parseBullets(job.eligibility) : null;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen">
-      <div className="mb-6">
-        <Link 
-          href="/government-jobs"
-          className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-          <span>Back to Government Jobs</span>
-        </Link>
-      </div>
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-gray-50">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="mb-6">
+            <Link 
+              href="/government-jobs"
+              className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
+            >
+              <ArrowLeftIcon className="h-5 w-5" />
+              <span>Back to Government Jobs</span>
+            </Link>
+          </div>
       <div className="mb-6 flex items-center space-x-3">
         <BuildingOfficeIcon className="h-8 w-8 text-green-600" />
         <h1 className="text-2xl font-bold text-gray-900">{job.postName}</h1>
@@ -178,6 +183,9 @@ export default async function GovernmentJobDetailPage({ params }: { params: { id
           </tbody>
         </table>
       </div>
-    </div>
+        </div>
+      </main>
+      <Footer />
+    </>
   );
 } 

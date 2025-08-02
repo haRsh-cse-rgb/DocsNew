@@ -96,15 +96,18 @@ export default function InternshipFilters({ filters, onFilterChange }: Internshi
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Filter Internships</h3>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-        >
-          {isExpanded ? 'Hide Filters' : 'Show Filters'}
-        </button>
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+          >
+            Clear All
+          </button>
+        )}
       </div>
 
-      <div className={`space-y-4 ${isExpanded ? 'block' : 'hidden'}`}>
+      {/* Filters in one row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         {/* Category Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -161,18 +164,6 @@ export default function InternshipFilters({ filters, onFilterChange }: Internshi
             ))}
           </select>
         </div>
-
-        {/* Clear Filters Button */}
-        {hasActiveFilters && (
-          <div className="pt-4 border-t border-gray-200">
-            <button
-              onClick={clearFilters}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Clear All Filters
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Active Filters Display */}

@@ -117,11 +117,11 @@ export default function CategoryJobsPage() {
         <div className="sticky top-0 z-10 bg-gray-50 pb-4 mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-2">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/')}
               className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
             >
               <ArrowLeftIcon className="h-5 w-5" />
-              <span>Back</span>
+              <span>Back to Home</span>
             </button>
             <h1 className="text-2xl font-bold text-gray-900">
               Jobs in <span className="text-primary-700">{category}</span>

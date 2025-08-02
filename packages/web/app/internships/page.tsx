@@ -28,6 +28,7 @@ interface Internship {
   category: string;
   postedAt: string;
   isActive: boolean;
+  batch?: string[];
 }
 
 export default function InternshipsPage() {
@@ -52,7 +53,7 @@ export default function InternshipsPage() {
 
   useEffect(() => {
     fetchInternships();
-  }, [searchParams, filters]);
+  }, [searchParams, filters, pagination.currentPage]);
 
   const fetchInternships = async () => {
     try {
@@ -116,11 +117,11 @@ export default function InternshipsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button */}
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push('/')}
             className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
           >
             <ArrowLeftIcon className="h-5 w-5 mr-2" />
-            Back
+            Back to Home
           </button>
 
           {/* Header */}

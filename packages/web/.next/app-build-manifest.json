@@ -11,20 +11,25 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/jobs/category/[category]/page": [
+    "/not-found": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/jobs/category/[category]/page.js"
+      "static/chunks/app/not-found.js"
     ],
-    "/jobs/[id]/page": [
+    "/jobs/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/jobs/[id]/page.js"
+      "static/chunks/app/jobs/page.js"
     ],
     "/internships/category/[category]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/internships/category/[category]/page.js"
+    ],
+    "/internships/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/internships/page.js"
     ],
     "/internships/[id]/page": [
       "static/chunks/webpack.js",
