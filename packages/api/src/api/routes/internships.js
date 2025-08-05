@@ -5,6 +5,7 @@ const auth = require('../middleware/auth');
 
 // Public routes
 router.get('/', internshipsController.getAllInternships);
+router.get('/filters', internshipsController.getInternshipFilters);
 router.get('/category/:category', internshipsController.getInternshipsByCategory);
 // Bulk upload route must be before any /:id routes
 router.post('/bulk-upload', auth, internshipsController.uploadMiddleware, internshipsController.bulkUploadInternships);

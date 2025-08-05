@@ -10,6 +10,7 @@ const s3Routes = require('./s3');
 const subscriptionRoutes = require('./subscription');
 const certificationsRoutes = require('./certifications');
 const internshipsRoutes = require('./internships');
+const walkingRoutes = require('./walking');
 
 // Use the routes
 router.use('/jobs', jobsRoutes);
@@ -20,5 +21,6 @@ router.use('/s3', s3Routes);
 router.use('/subscription', subscriptionRoutes);
 router.use('/certifications', certificationsRoutes);
 router.use('/internships', internshipsRoutes);
+router.use('/walking', walkingRoutes);
 
 module.exports = router;

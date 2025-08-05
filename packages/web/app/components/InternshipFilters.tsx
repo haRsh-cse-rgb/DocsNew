@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface FilterState {
   category: string;
   location: string;
-  duration: string;
+  batch: string;
 }
 
 interface InternshipFiltersProps {
@@ -15,45 +15,32 @@ interface InternshipFiltersProps {
 }
 
 export default function InternshipFilters({ filters, onFilterChange }: InternshipFiltersProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [batches, setBatches] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Categories based on common internship types
-  const categories = [
-    'Software Development',
-    'Data Science',
-    'Marketing',
-    'Finance',
-    'Design',
-    'Sales',
-    'HR',
-    'Operations',
-    'Research',
-    'Content Writing',
-    'Business Development',
-    'Product Management'
-  ];
+  useEffect(() => {
+    fetchFilters();
+  }, []);
 
-  const locations = [
-    'Bangalore',
-    'Mumbai',
-    'Delhi',
-    'Hyderabad',
-    'Chennai',
-    'Pune',
-    'Kolkata',
-    'Ahmedabad',
-    'Remote',
-    'Gurgaon',
-    'Noida'
-  ];
-
-  const durations = [
-    '2 months',
-    '3 months',
-    '6 months',
-    '1 year',
-    'Flexible'
-  ];
+  const fetchFilters = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/internships/filters`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setCategories(data.categories || []);
+        setLocations(data.locations || []);
+        setBatches(data.batches || []);
+      }
+    } catch (error) {
+      console.error('Error fetching filters:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
@@ -76,13 +63,13 @@ export default function InternshipFilters({ filters, onFilterChange }: Internshi
     const newFilters = {
       category: '',
       location: '',
-      duration: ''
+      batch: ''
     };
     onFilterChange(newFilters);
     
     // Clear URL parameters
     const url = new URL(window.location.href);
-    ['category', 'location', 'duration'].forEach(key => {
+    ['category', 'location', 'batch'].forEach(key => {
       url.searchParams.delete(key);
     });
     window.history.pushState({}, '', url.toString());
@@ -92,24 +79,23 @@ export default function InternshipFilters({ filters, onFilterChange }: Internshi
 
   const hasActiveFilters = Object.values(filters).some(value => value !== '');
 
-  return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Filter Internships</h3>
-        {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-          >
-            Clear All
-          </button>
-        )}
+  if (loading) {
+    return (
+      <div className="mb-6">
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <p className="text-sm text-gray-600 ml-2">Loading filters...</p>
+        </div>
       </div>
+    );
+  }
 
+  return (
+    <div className="mb-6">
       {/* Filters in one row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
         {/* Category Filter */}
-        <div>
+        <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Category
           </label>
@@ -128,7 +114,7 @@ export default function InternshipFilters({ filters, onFilterChange }: Internshi
         </div>
 
         {/* Location Filter */}
-        <div>
+        <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Location
           </label>
@@ -146,29 +132,41 @@ export default function InternshipFilters({ filters, onFilterChange }: Internshi
           </select>
         </div>
 
-        {/* Duration Filter */}
-        <div>
+        {/* Batch Filter */}
+        <div className="flex-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Duration
+            Batch
           </label>
           <select
-            value={filters.duration}
-            onChange={(e) => handleFilterChange('duration', e.target.value)}
+            value={filters.batch}
+            onChange={(e) => handleFilterChange('batch', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">All Durations</option>
-            {durations.map((duration) => (
-              <option key={duration} value={duration}>
-                {duration}
+            <option value="">All Batches</option>
+            {batches.map((batch) => (
+              <option key={batch} value={batch}>
+                {batch}
               </option>
             ))}
           </select>
         </div>
+
+        {/* Clear All Button */}
+        {hasActiveFilters && (
+          <div className="flex items-end">
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium border border-blue-200 rounded-lg hover:bg-blue-50"
+            >
+              Clear All
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="pt-4 border-t border-gray-200">
+        <div className="mb-4">
           <p className="text-sm font-medium text-gray-700 mb-2">Active Filters:</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(filters).map(([key, value]) => {

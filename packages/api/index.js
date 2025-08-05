@@ -40,6 +40,7 @@ app.use('/api/v1/jobs', publicLimiter);
 app.use('/api/v1/internships', publicLimiter);
 app.use('/api/v1/sarkari-jobs', publicLimiter);
 app.use('/api/v1/certifications', publicLimiter);
+app.use('/api/v1/walking', publicLimiter);
 
 const analyzeCvLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute

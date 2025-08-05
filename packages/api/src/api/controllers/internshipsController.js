@@ -32,7 +32,7 @@ async function getCompanyLogo(companyName) {
 // Get all internships with optional filtering
 exports.getAllInternships = async (req, res) => {
   try {
-    const { category, location, duration, q: searchTerm, page = 1, limit = 15 } = req.query;
+    const { category, location, batch, q: searchTerm, page = 1, limit = 15 } = req.query;
     const offset = (page - 1) * limit;
 
     let params = {
@@ -59,11 +59,11 @@ exports.getAllInternships = async (req, res) => {
       params.ExpressionAttributeValues[':location'] = location;
     }
 
-    // Add duration filter
-    if (duration) {
-      params.FilterExpression += ' AND contains(#duration, :duration)';
-      params.ExpressionAttributeNames['#duration'] = 'duration';
-      params.ExpressionAttributeValues[':duration'] = duration;
+    // Add batch filter
+    if (batch) {
+      params.FilterExpression += ' AND contains(#batch, :batch)';
+      params.ExpressionAttributeNames['#batch'] = 'batch';
+      params.ExpressionAttributeValues[':batch'] = batch;
     }
 
     // Add search term filter
@@ -532,6 +532,50 @@ exports.bulkUploadInternships = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to upload internships',
+      error: error.message
+    });
+  }
+};
+
+// Get unique categories, locations, and batches for filters
+exports.getInternshipFilters = async (req, res) => {
+  try {
+    const params = {
+      TableName: TABLE_NAME,
+      FilterExpression: '#isActive = :active',
+      ExpressionAttributeNames: {
+        '#isActive': 'isActive'
+      },
+      ExpressionAttributeValues: {
+        ':active': true
+      }
+    };
+
+    const command = new ScanCommand(params);
+    const result = await docClient.send(command);
+    
+    // Extract unique categories, locations, and batches
+    const categories = [...new Set(result.Items.map(item => item.category).filter(Boolean))].sort();
+    const locations = [...new Set(result.Items.map(item => item.location).filter(Boolean))].sort();
+    
+    // Extract unique batches from all batch arrays
+    const allBatches = result.Items
+      .filter(item => item.batch && Array.isArray(item.batch))
+      .flatMap(item => item.batch)
+      .filter(Boolean);
+    const batches = [...new Set(allBatches)].sort();
+
+    res.json({
+      success: true,
+      categories,
+      locations,
+      batches
+    });
+  } catch (error) {
+    console.error('Error fetching internship filters:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch internship filters',
       error: error.message
     });
   }

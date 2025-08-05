@@ -45,7 +45,7 @@ export default function InternshipsPage() {
   const [filters, setFilters] = useState({
     category: '',
     location: '',
-    duration: ''
+    batch: ''
   });
 
   const searchParams = useSearchParams();
@@ -69,7 +69,7 @@ export default function InternshipsPage() {
       // Add filter params
       if (filters.category) params.append('category', filters.category);
       if (filters.location) params.append('location', filters.location);
-      if (filters.duration) params.append('duration', filters.duration);
+      if (filters.batch) params.append('batch', filters.batch);
 
       // Add search params from URL
       const searchTerm = searchParams.get('q');
@@ -157,7 +157,7 @@ export default function InternshipsPage() {
                 <p className="text-gray-600 text-lg">No internships found matching your criteria</p>
                 <button 
                   onClick={() => {
-                    setFilters({ category: '', location: '', duration: '' });
+                    setFilters({ category: '', location: '', batch: '' });
                     setPagination(prev => ({ ...prev, currentPage: 1 }));
                   }}
                   className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"

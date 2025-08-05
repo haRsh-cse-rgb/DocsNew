@@ -148,6 +148,13 @@ export default function AdminDashboard() {
       icon: BriefcaseIcon,
       href: '/admin/internships',
       color: 'bg-pink-500'
+    },
+    {
+      title: 'Walking',
+      description: 'Manage walking opportunities',
+      icon: BriefcaseIcon,
+      href: '/admin/walking',
+      color: 'bg-orange-500'
     }
   ];
 
