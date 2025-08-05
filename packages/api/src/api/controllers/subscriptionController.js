@@ -1,6 +1,6 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
-const kafkaProducer = require('../../services/kafka');
+// const kafkaProducer = require('../../services/kafka');
 const logActivity = require('../utils/activityLogger');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
@@ -42,22 +42,22 @@ const subscriptionController = {
       }
 
       // Send event to Kafka for newsletter processing
-      try {
-        await kafkaProducer.send({
-          topic: 'new-subscriptions',
-          messages: [{
-            key: email,
-            value: JSON.stringify({
-              email,
-              categories,
-              subscribedAt: new Date().toISOString()
-            })
-          }]
-        });
-      } catch (kafkaError) {
-        console.error('Kafka error (non-blocking):', kafkaError);
-        // Continue even if Kafka fails
-      }
+      // try {
+      //   await kafkaProducer.send({
+      //     topic: 'new-subscriptions',
+      //     messages: [{
+      //       key: email,
+      //       value: JSON.stringify({
+      //         email,
+      //         categories,
+      //         subscribedAt: new Date().toISOString()
+      //       })
+      //     }]
+      //   });
+      // } catch (kafkaError) {
+      //   console.error('Kafka error (non-blocking):', kafkaError);
+      //   // Continue even if Kafka fails
+      // }
 
       res.json({
         message: 'Subscription successful',

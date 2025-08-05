@@ -64,7 +64,7 @@ export default function InternshipsPage() {
       
       // Add pagination params
       params.append('page', pagination.currentPage.toString());
-      params.append('limit', '12');
+      params.append('limit', '30');
 
       // Add filter params
       if (filters.category) params.append('category', filters.category);

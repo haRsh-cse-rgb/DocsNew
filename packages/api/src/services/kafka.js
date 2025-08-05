@@ -1,3 +1,5 @@
+// Kafka service disabled - uncomment to re-enable
+/*
 const { Kafka } = require('kafkajs');
 
 let producer;
@@ -27,3 +29,14 @@ try {
 }
 
 module.exports = producer;
+*/
+
+// Mock producer for when Kafka is disabled
+const mockProducer = {
+  send: async (message) => {
+    console.log('Kafka disabled - Mock message:', message);
+    return Promise.resolve();
+  }
+};
+
+module.exports = mockProducer;

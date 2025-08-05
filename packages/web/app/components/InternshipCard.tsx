@@ -45,7 +45,7 @@ export default function InternshipCard({ internship }: InternshipCardProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 group">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 group h-full flex flex-col">
       {/* Header with Logo and Title */}
       <div className="flex items-start gap-4 mb-4">
         {/* Company Logo */}
@@ -116,6 +116,10 @@ export default function InternshipCard({ internship }: InternshipCardProps) {
         <div className="flex items-center space-x-2">
           <CalendarIcon className="h-4 w-4 flex-shrink-0" />
           <span className="truncate">{internship.duration}</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <CalendarIcon className="h-4 w-4 flex-shrink-0" />
+          <span className="truncate">{timeAgo}</span>
         </div>
       </div>
 

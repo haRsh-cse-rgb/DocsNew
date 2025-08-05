@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import InternshipCard from "../../../components/InternshipCard";
+import InternshipCategoryCard from "../../../components/InternshipCategoryCard";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import Navbar from "../../../components/Navbar";
 import Footer from "../../../components/Footer";
@@ -148,7 +148,7 @@ export default function CategoryInternshipsPage() {
           <div className="flex flex-col gap-4 mb-8">
             {internships.map((internship) => (
               <div key={internship.id} className="max-w-4xl mx-auto w-full">
-                <InternshipCard internship={internship} />
+                <InternshipCategoryCard internship={internship} />
               </div>
             ))}
           </div>
