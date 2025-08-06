@@ -16,15 +16,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/not-found.js"
     ],
-    "/internships/category/[category]/page": [
+    "/jobs/category/[category]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/internships/category/[category]/page.js"
+      "static/chunks/app/jobs/category/[category]/page.js"
+    ],
+    "/jobs/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/jobs/page.js"
+    ],
+    "/government-jobs/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/government-jobs/page.js"
     ],
     "/internships/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/internships/page.js"
+    ],
+    "/internships/category/[category]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/internships/category/[category]/page.js"
     ]
   }
 }

@@ -755,6 +755,32 @@ const adminController = {
       const totalGovtJobs = sarkariResult.Items ? sarkariResult.Items.length : 0;
       const activeGovtJobs = sarkariResult.Items ? sarkariResult.Items.filter(j => j.status === 'active').length : 0;
 
+      // Count internships
+      let totalInternships = 0;
+      let activeInternships = 0;
+      if (process.env.INTERNSHIPS_TABLE) {
+        const internParams = {
+          TableName: process.env.INTERNSHIPS_TABLE,
+        };
+        const internCommand = new ScanCommand(internParams);
+        const internResult = await docClient.send(internCommand);
+        totalInternships = internResult.Items ? internResult.Items.length : 0;
+        activeInternships = internResult.Items ? internResult.Items.filter(i => i.isActive === true).length : 0;
+      }
+
+      // Count walking
+      let totalWalking = 0;
+      let activeWalking = 0;
+      if (process.env.WALKING_TABLE) {
+        const walkingParams = {
+          TableName: process.env.WALKING_TABLE,
+        };
+        const walkingCommand = new ScanCommand(walkingParams);
+        const walkingResult = await docClient.send(walkingCommand);
+        totalWalking = walkingResult.Items ? walkingResult.Items.length : 0;
+        activeWalking = walkingResult.Items ? walkingResult.Items.filter(w => w.isActive === true).length : 0;
+      }
+
       // Count certifications
       let totalCertifications = 0;
       if (process.env.CERTIFICATIONS_TABLE) {
@@ -782,6 +808,10 @@ const adminController = {
         activePrivateJobs,
         totalGovtJobs,
         activeGovtJobs,
+        totalInternships,
+        activeInternships,
+        totalWalking,
+        activeWalking,
         totalCertifications,
         totalSubscriptions
       });

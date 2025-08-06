@@ -9,7 +9,7 @@ interface Props {
 
 async function getInternship(id: string) {
   try {
-    const response = await axios.get(`${process.env.API_BASE_URL || 'http://localhost:5000/api/v1'}/internships/${id}`);
+    const response = await axios.get(`${process.env.API_BASE_URL || 'http://localhost:5001/api/v1'}/internships/${id}`);
     return response.data.internship; // Fix: extract the internship object
   } catch (error) {
     console.error('Error fetching internship:', error);

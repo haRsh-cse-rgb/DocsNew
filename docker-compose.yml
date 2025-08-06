@@ -42,9 +42,11 @@ services:
       S3_BUCKET_NAME: jobquest-cv-uploads
       JOBS_TABLE: Jobs
       SARKARI_JOBS_TABLE: SarkariJobs
+      INTERNSHIPS_TABLE: Internships
+      WALKING_TABLE: Walking
+      CERTIFICATIONS_TABLE: Certifications
       ADMINS_TABLE: Admins
       SUBSCRIPTIONS_TABLE: Subscriptions
-      WALKING_TABLE: Walking
       REDIS_URL: redis://redis:6379
       ADMIN_EMAIL: admin@jobquest.com
       ADMIN_PASSWORD: admin123

@@ -9,7 +9,7 @@ interface Props {
 
 async function getJob(id: string) {
   try {
-    const response = await axios.get(`${process.env.API_BASE_URL || 'http://localhost:5000/api/v1'}/jobs/${id}`);
+    const response = await axios.get(`${process.env.API_BASE_URL || 'http://localhost:5001/api/v1'}/jobs/${id}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching job:', error);

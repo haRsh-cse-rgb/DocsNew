@@ -298,44 +298,76 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Total Private Jobs</p>
                 <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalPrivateJobs : 0}</p>
                 <p className="text-sm text-gray-500">Active: {stats ? stats.activePrivateJobs : 0}</p>
               </div>
-              <BriefcaseIcon className="h-8 w-8 text-gray-400" />
+              <div className="flex-shrink-0">
+                <BriefcaseIcon className="h-8 w-8 text-blue-500" />
+              </div>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Total Govt Jobs</p>
                 <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalGovtJobs : 0}</p>
                 <p className="text-sm text-gray-500">Active: {stats ? stats.activeGovtJobs : 0}</p>
               </div>
-              <DocumentTextIcon className="h-8 w-8 text-gray-400" />
+              <div className="flex-shrink-0">
+                <DocumentTextIcon className="h-8 w-8 text-green-500" />
+              </div>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-600">Total Internships</p>
+                <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalInternships : 0}</p>
+                <p className="text-sm text-gray-500">Active: {stats ? stats.activeInternships : 0}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <BriefcaseIcon className="h-8 w-8 text-pink-500" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-600">Total Walking</p>
+                <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalWalking : 0}</p>
+                <p className="text-sm text-gray-500">Active: {stats ? stats.activeWalking : 0}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <BriefcaseIcon className="h-8 w-8 text-orange-500" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Total Certifications</p>
                 <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalCertifications : 0}</p>
                 <p className="text-sm text-gray-500">Free certifications</p>
               </div>
-              <AcademicCapIcon className="h-8 w-8 text-gray-400" />
+              <div className="flex-shrink-0">
+                <AcademicCapIcon className="h-8 w-8 text-purple-500" />
+              </div>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
-              <div>
+              <div className="flex-1">
                 <p className="text-sm font-medium text-gray-600">Subscriptions</p>
                 <p className="text-2xl font-bold text-gray-900">{stats ? stats.totalSubscriptions : 0}</p>
               </div>
-              <ChartBarIcon className="h-8 w-8 text-gray-400" />
+              <div className="flex-shrink-0">
+                <ChartBarIcon className="h-8 w-8 text-indigo-500" />
+              </div>
             </div>
           </div>
         </div>
