@@ -31,6 +31,11 @@ export default function CategoryJobsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [allCategoryJobs, setAllCategoryJobs] = useState<any[]>([]);
 
+  // Set page title
+  useEffect(() => {
+    document.title = `${category} Jobs`;
+  }, [category]);
+
   // Fetch jobs for category, batch, and location
   const fetchJobs = async (page = 1) => {
     try {

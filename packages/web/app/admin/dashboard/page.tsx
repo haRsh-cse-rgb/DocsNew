@@ -34,6 +34,11 @@ export default function AdminDashboard() {
   const [creatingAdmin, setCreatingAdmin] = useState(false);
   const router = useRouter();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Admin Dashboard';
+  }, []);
+
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem('adminToken');

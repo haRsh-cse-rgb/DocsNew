@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation';
 export default function JobsPage() {
   const router = useRouter();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Jobs';
+  }, []);
+
   useEffect(() => {
     router.replace('/');
   }, [router]);

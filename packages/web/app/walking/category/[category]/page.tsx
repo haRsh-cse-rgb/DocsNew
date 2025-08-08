@@ -31,6 +31,11 @@ export default function WalkingCategoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Set page title
+  useEffect(() => {
+    document.title = `${category} Walk-ins`;
+  }, [category]);
+
   useEffect(() => {
     if (category) {
       fetchWalkingByCategory();

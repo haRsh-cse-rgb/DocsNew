@@ -44,6 +44,11 @@ export default function WalkingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Walk-ins';
+  }, []);
+
   useEffect(() => {
     fetchWalking();
   }, [searchParams, filters, pagination.currentPage]);

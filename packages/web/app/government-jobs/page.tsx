@@ -27,6 +27,11 @@ export default function GovernmentJobsPage() {
   const [orgFilter, setOrgFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Government Jobs';
+  }, []);
+
   const fetchJobs = async (page = 1) => {
     try {
       setLoading(true);

@@ -5,6 +5,7 @@ import { BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { Metadata } from 'next';
 
 function parseDelimited(str?: string): Array<{ category: string; value: string }> {
   if (!str) return [];
@@ -26,6 +27,15 @@ async function getSarkariJob(id: string) {
   } catch {
     return null;
   }
+}
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const job = await getSarkariJob(params.id);
+  const title = job?.postName || 'Government Job Details';
+  return {
+    title: `${title} - India Jobs`,
+    description: job?.description || 'View government job details and apply for this position.',
+  };
 }
 
 export default async function GovernmentJobDetailPage({ params }: { params: { id: string } }) {

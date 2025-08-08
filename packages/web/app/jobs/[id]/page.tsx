@@ -17,23 +17,12 @@ async function getJob(id: string) {
   }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const job = await getJob(params.id);
-  
-  if (!job) {
-    return {
-      title: 'Job Not Found - JobQuest',
-    };
-  }
-
+  const title = job?.title || 'Job Details';
   return {
-    title: `${job.role} at ${job.companyName} in ${job.location} - JobQuest`,
-    description: job.jobDescription.substring(0, 160) + '...',
-    openGraph: {
-      title: `${job.role} at ${job.companyName}`,
-      description: job.jobDescription.substring(0, 160) + '...',
-      type: 'article',
-    },
+    title: `${title} - India Jobs`,
+    description: job?.description || 'View job details and apply for this position.',
   };
 }
 

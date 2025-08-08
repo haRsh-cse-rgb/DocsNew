@@ -26,6 +26,11 @@ export default function CertificationsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const router = useRouter();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Certifications';
+  }, []);
+
   useEffect(() => {
     fetchCertifications();
   }, [selectedCategory]);

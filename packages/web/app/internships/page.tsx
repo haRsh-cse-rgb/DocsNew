@@ -51,6 +51,11 @@ export default function InternshipsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'Internships';
+  }, []);
+
   useEffect(() => {
     fetchInternships();
   }, [searchParams, filters, pagination.currentPage]);

@@ -27,6 +27,11 @@ export default function CategoryInternshipsPage() {
   const [locationFilter, setLocationFilter] = useState("");
   const [allCategoryInternships, setAllCategoryInternships] = useState<any[]>([]);
 
+  // Set page title
+  useEffect(() => {
+    document.title = `${category} Internships`;
+  }, [category]);
+
   // Fetch internships for category and location
   const fetchInternships = async (page = 1) => {
     try {

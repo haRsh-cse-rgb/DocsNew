@@ -17,23 +17,12 @@ async function getInternship(id: string) {
   }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const internship = await getInternship(params.id);
-  
-  if (!internship) {
-    return {
-      title: 'Internship Not Found - JobQuest',
-    };
-  }
-
+  const title = internship?.title || 'Internship Details';
   return {
-    title: `${internship.title} at ${internship.company} in ${internship.location} - JobQuest`,
-    description: internship.description ? internship.description.substring(0, 160) + '...' : 'Internship opportunity',
-    openGraph: {
-      title: `${internship.title} at ${internship.company}`,
-      description: internship.description ? internship.description.substring(0, 160) + '...' : 'Internship opportunity',
-      type: 'article',
-    },
+    title: `${title} - India Jobs`,
+    description: internship?.description || 'View internship details and apply for this position.',
   };
 }
 
