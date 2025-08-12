@@ -43,7 +43,7 @@ exports.getAllWalking = async (req, res) => {
   try {
     console.log('Getting all walking opportunities from table:', TABLE_NAME);
     
-    const { category, location, page = 1, limit = 30 } = req.query;
+    const { category, location, q: searchTerm, page = 1, limit = 30 } = req.query;
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const offset = (pageNum - 1) * limitNum;
@@ -59,15 +59,28 @@ exports.getAllWalking = async (req, res) => {
     let filteredItems = result.Items;
     
     if (category) {
-      filteredItems = filteredItems.filter(item => 
+      filteredItems = filteredItems.filter(item =>
         item.category && item.category.toLowerCase() === category.toLowerCase()
       );
     }
     
     if (location) {
-      filteredItems = filteredItems.filter(item => 
+      filteredItems = filteredItems.filter(item =>
         item.location && item.location.toLowerCase().includes(location.toLowerCase())
       );
+    }
+    
+    // Case-insensitive search filter in Node.js
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filteredItems = filteredItems.filter(item => {
+        return (
+          (item.title && item.title.toLowerCase().includes(search)) ||
+          (item.company && item.company.toLowerCase().includes(search)) ||
+          (item.category && item.category.toLowerCase().includes(search)) ||
+          (item.experience && item.experience.toLowerCase().includes(search))
+        );
+      });
     }
     
     // Add company logos to each walking opportunity

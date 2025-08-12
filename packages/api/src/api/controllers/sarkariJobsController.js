@@ -11,7 +11,8 @@ const sarkariJobsController = {
       const {
         page = 1,
         limit = 15,
-        organization
+        organization,
+        q: searchTerm
       } = req.query;
 
       const offset = (page - 1) * limit;
@@ -41,7 +42,20 @@ const sarkariJobsController = {
       const command = new ScanCommand(params);
       const result = await docClient.send(command);
 
-      const sortedJobs = result.Items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      let sortedJobs = result.Items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+      
+      // Case-insensitive search filter in Node.js
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        sortedJobs = sortedJobs.filter(job => {
+          return (
+            (job.title && job.title.toLowerCase().includes(search)) ||
+            (job.organization && job.organization.toLowerCase().includes(search)) ||
+            (job.category && job.category.toLowerCase().includes(search))
+          );
+        });
+      }
+      
       const paginatedJobs = sortedJobs.slice(offset, offset + parseInt(limit));
       
       const response = {

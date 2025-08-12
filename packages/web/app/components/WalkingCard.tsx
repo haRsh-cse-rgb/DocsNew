@@ -86,21 +86,21 @@ export default function WalkingCard({ walking }: WalkingCardProps) {
       </div>
 
       {/* Meta Information */}
-      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-        <div className="flex items-center space-x-1">
-          <MapPinIcon className="h-4 w-4 text-gray-400" />
+      <div className="flex flex-col space-y-2 text-sm text-gray-600 mb-4">
+        <div className="flex items-center space-x-2">
+          <MapPinIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
           <span>{walking.location}</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <BriefcaseIcon className="h-4 w-4 text-gray-400" />
+        <div className="flex items-center space-x-2">
+          <BriefcaseIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
           <span>{walking.experience}</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <CalendarIcon className="h-4 w-4 text-gray-400" />
+        <div className="flex items-center space-x-2">
+          <CalendarIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
           <span>{walking.date}</span>
         </div>
-        <div className="flex items-center space-x-1">
-          <ClockIcon className="h-4 w-4 text-gray-400" />
+        <div className="flex items-center space-x-2">
+          <ClockIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
           <span>{walking.time}</span>
         </div>
       </div>

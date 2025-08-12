@@ -71,10 +71,12 @@ const jobsController = {
         params.ExpressionAttributeValues[':tags'] = tags;
       }
 
+      
+
       if (searchTerm) {
-        params.FilterExpression += ' AND (contains(#role, :searchTerm) OR contains(companyName, :searchTerm))';
-        params.ExpressionAttributeNames['#role'] = 'role';
-        params.ExpressionAttributeValues[':searchTerm'] = searchTerm;
+        // Note: DynamoDB's contains function is case-sensitive, so we perform
+        // case-insensitive search in Node.js after fetching results
+        
       }
 
       if (role) {

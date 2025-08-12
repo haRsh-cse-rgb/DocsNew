@@ -36,6 +36,8 @@ async function getProviderLogo(providerName) {
 // Get all certifications
 exports.getAllCertifications = async (req, res) => {
   try {
+    const { q: searchTerm } = req.query;
+    
     const params = {
       TableName: TABLE_NAME,
       ScanIndexForward: false // Sort by postedAt descending
@@ -43,9 +45,23 @@ exports.getAllCertifications = async (req, res) => {
 
     const result = await dynamodb.scan(params).promise();
     
+    let certifications = result.Items || [];
+    
+    // Case-insensitive search filter in Node.js
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      certifications = certifications.filter(cert => {
+        return (
+          (cert.title && cert.title.toLowerCase().includes(search)) ||
+          (cert.provider && cert.provider.toLowerCase().includes(search)) ||
+          (cert.category && cert.category.toLowerCase().includes(search))
+        );
+      });
+    }
+    
     // Add provider logos to each certification
     const certificationsWithLogos = await Promise.all(
-      result.Items.map(async (cert) => ({
+      certifications.map(async (cert) => ({
         ...cert,
         providerLogo: await getProviderLogo(cert.provider)
       }))

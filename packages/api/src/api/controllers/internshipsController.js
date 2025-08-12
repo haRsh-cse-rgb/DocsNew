@@ -66,12 +66,9 @@ exports.getAllInternships = async (req, res) => {
       params.ExpressionAttributeValues[':batch'] = batch;
     }
 
-    // Add search term filter
-    if (searchTerm) {
-      params.FilterExpression += ' AND (contains(#title, :searchTerm) OR contains(company, :searchTerm))';
-      params.ExpressionAttributeNames['#title'] = 'title';
-      params.ExpressionAttributeValues[':searchTerm'] = searchTerm;
-    }
+    // Note: Search term filter is handled in Node.js to enable case-insensitive search
+    // DynamoDB's contains function is case-sensitive, so we perform case-insensitive
+    // search after fetching results
 
     const command = new ScanCommand(params);
     const result = await docClient.send(command);
@@ -409,6 +406,17 @@ exports.getInternshipsByCategory = async (req, res) => {
     const result = await docClient.send(command);
 
     let internships = result.Items || [];
+    
+    // Case-insensitive search filter in Node.js
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      internships = internships.filter(internship => {
+        return (
+          (internship.title && internship.title.toLowerCase().includes(search)) ||
+          (internship.company && internship.company.toLowerCase().includes(search))
+        );
+      });
+    }
     
     // Sort by posted date (newest first)
     internships.sort((a, b) => new Date(b.postedAt) - new Date(a.postedAt));
