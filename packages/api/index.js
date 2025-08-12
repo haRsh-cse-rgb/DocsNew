@@ -53,6 +53,15 @@ app.use('/api/v1/ai/analyze-cv', analyzeCvLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Pre-initialize controllers to avoid cold start delays
+console.log('🚀 Pre-initializing controllers...');
+const jobsController = require('./src/api/controllers/jobsController');
+const internshipsController = require('./src/api/controllers/internshipsController');
+const certificationsController = require('./src/api/controllers/certificationsController');
+const walkingController = require('./src/api/controllers/walkingController');
+const sarkariJobsController = require('./src/api/controllers/sarkariJobsController');
+console.log('✅ Controllers pre-initialized');
+
 // API Routes
 app.use('/api/v1', require('./src/api/routes'));
 

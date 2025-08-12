@@ -19,6 +19,14 @@ export default function Hero() {
       
       // Trigger a custom event to notify JobGrid component
       window.dispatchEvent(new CustomEvent('searchUpdate'));
+      
+      // Scroll to job results after a short delay to allow results to load
+      setTimeout(() => {
+        const jobsSection = document.getElementById('jobs');
+        if (jobsSection) {
+          jobsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
     }
   };
 

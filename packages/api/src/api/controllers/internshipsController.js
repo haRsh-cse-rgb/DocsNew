@@ -386,7 +386,7 @@ exports.deleteInternship = async (req, res) => {
 exports.getInternshipsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
-    const { page = 1, limit = 15 } = req.query;
+    const { page = 1, limit = 15, q: searchTerm } = req.query;
     const offset = (page - 1) * limit;
 
     const params = {
