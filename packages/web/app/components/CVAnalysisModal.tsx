@@ -14,6 +14,7 @@ import {
 import { Job } from '../types';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import LoadingSpinner from './LoadingSpinner';
 
 interface CVAnalysisModalProps {
   isOpen: boolean;
@@ -257,7 +258,7 @@ export default function CVAnalysisModal({ isOpen, onClose, job, isInternship = f
                 {(uploading || analyzing) && (
                   <div className="text-center">
                     <div className="inline-flex items-center space-x-2 text-sm text-gray-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+                      <LoadingSpinner size="sm" />
                       <span>
                         {uploading ? 'Uploading your CV...' : 'AI is analyzing your CV...'}
                       </span>

@@ -5,6 +5,7 @@ import { Dialog } from '@headlessui/react';
 import { XMarkIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import axios from 'axios';
+import LoadingSpinner from './LoadingSpinner';
 
 interface NewsletterModalProps {
   isOpen: boolean;
@@ -142,9 +143,16 @@ export default function NewsletterModal({ isOpen, onClose }: NewsletterModalProp
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {loading ? 'Subscribing...' : 'Subscribe to Alerts'}
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" variant="white" className="mr-2" />
+                  <span>Subscribing...</span>
+                </>
+              ) : (
+                'Subscribe to Alerts'
+              )}
             </button>
 
             <p className="text-xs text-gray-500 text-center">

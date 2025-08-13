@@ -20,6 +20,7 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import toast from 'react-hot-toast';
 import CVAnalysisModal from '../../components/CVAnalysisModal';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 interface Internship {
   id: string;
@@ -46,6 +47,8 @@ interface InternshipDetailClientProps {
 
 export default function InternshipDetailClient({ internship }: InternshipDetailClientProps) {
   const [showCVAnalysis, setShowCVAnalysis] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const router = useRouter();
 
   // Validate dates before using them
@@ -59,6 +62,7 @@ export default function InternshipDetailClient({ internship }: InternshipDetailC
     : 'Unknown';
 
   const handleShare = async () => {
+    setShareLoading(true);
     if (navigator.share) {
       try {
         await navigator.share({
@@ -74,11 +78,16 @@ export default function InternshipDetailClient({ internship }: InternshipDetailC
       navigator.clipboard.writeText(window.location.href);
       toast.success('Internship link copied to clipboard!');
     }
+    setShareLoading(false);
   };
 
   const handleBookmark = () => {
+    setBookmarkLoading(true);
     // In a real app, this would save to user's bookmarks
-    toast.success('Internship bookmarked! (Feature coming soon)');
+    setTimeout(() => {
+      toast.success('Internship bookmarked! (Feature coming soon)');
+      setBookmarkLoading(false);
+    }, 500);
   };
 
   function parseInternshipDescription(desc?: string) {
@@ -216,17 +225,37 @@ export default function InternshipDetailClient({ internship }: InternshipDetailC
                   </button>
                   <button
                     onClick={handleShare}
-                    className="btn-secondary flex items-center justify-center space-x-2"
+                    disabled={shareLoading}
+                    className="btn-secondary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ShareIcon className="h-5 w-5" />
-                    <span>Share</span>
+                    {shareLoading ? (
+                      <>
+                        <LoadingSpinner size="sm" className="mr-2" />
+                        <span>Sharing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShareIcon className="h-5 w-5" />
+                        <span>Share</span>
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={handleBookmark}
-                    className="btn-secondary flex items-center justify-center space-x-2"
+                    disabled={bookmarkLoading}
+                    className="btn-secondary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <BookmarkIcon className="h-5 w-5" />
-                    <span>Save</span>
+                    {bookmarkLoading ? (
+                      <>
+                        <LoadingSpinner size="sm" className="mr-2" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <BookmarkIcon className="h-5 w-5" />
+                        <span>Save</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -368,4 +397,4 @@ export default function InternshipDetailClient({ internship }: InternshipDetailC
       />
     </>
   );
-} 
+}

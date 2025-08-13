@@ -517,8 +517,14 @@ exports.bulkUploadInternships = async (req, res) => {
             }
           }
 
-          // Clean up uploaded file
-          fs.unlinkSync(req.file.path);
+          // Clean up uploaded file after processing is complete
+          setTimeout(() => {
+            try {
+              fs.unlinkSync(req.file.path);
+            } catch (unlinkError) {
+              console.error('Error deleting uploaded file:', unlinkError);
+            }
+          }, 1000); // Delay file deletion to ensure processing is complete
 
           res.json({
             success: true,
@@ -528,12 +534,32 @@ exports.bulkUploadInternships = async (req, res) => {
           });
         } catch (error) {
           console.error('Error in bulk upload:', error);
+          // Clean up uploaded file on error
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch (unlinkError) {
+            console.error('Error deleting uploaded file:', unlinkError);
+          }
           res.status(500).json({
             success: false,
             message: 'Failed to process bulk upload',
             error: error.message
           });
         }
+      })
+      .on('error', (error) => {
+        console.error('Error reading CSV file:', error);
+        // Clean up uploaded file on error
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch (unlinkError) {
+          console.error('Error deleting uploaded file:', unlinkError);
+        }
+        res.status(500).json({
+          success: false,
+          message: 'Failed to read CSV file',
+          error: error.message
+        });
       });
   } catch (error) {
     console.error('Error in bulk upload:', error);
@@ -587,4 +613,4 @@ exports.getInternshipFilters = async (req, res) => {
       error: error.message
     });
   }
-}; 
+};

@@ -4,14 +4,19 @@ import { useState } from 'react';
 import { MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import NewsletterModal from './NewsletterModal';
 import DotGrid from './DotGrid';
+import LoadingSpinner from './LoadingSpinner';
 
 export default function Hero() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewsletter, setShowNewsletter] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
+      // Set loading state
+      setSearchLoading(true);
+      
       // Update URL with search parameter
       const url = new URL(window.location.href);
       url.searchParams.set('q', searchTerm.trim());
@@ -20,13 +25,10 @@ export default function Hero() {
       // Trigger a custom event to notify JobGrid component
       window.dispatchEvent(new CustomEvent('searchUpdate'));
       
-      // Scroll to job results after a short delay to allow results to load
+      // Simulate a small delay to show the loading state
       setTimeout(() => {
-        const jobsSection = document.getElementById('jobs');
-        if (jobsSection) {
-          jobsSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
+        setSearchLoading(false);
+      }, 500);
     }
   };
 
@@ -69,9 +71,17 @@ export default function Hero() {
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-[#8A00C4]" />
                 <button
                   type="submit"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#8A00C4] hover:bg-[#6a0099] text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 border border-[#8A00C4]/30 shadow-md"
+                  disabled={searchLoading}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#8A00C4] hover:bg-[#6a0099] text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 border border-[#8A00C4]/30 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
-                  Search
+                  {searchLoading ? (
+                    <>
+                      <LoadingSpinner size="sm" variant="white" className="mr-2" />
+                      <span>Searching...</span>
+                    </>
+                  ) : (
+                    <span>Search</span>
+                  )}
                 </button>
               </div>
             </form>
