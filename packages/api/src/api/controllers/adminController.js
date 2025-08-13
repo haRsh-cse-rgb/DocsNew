@@ -11,6 +11,28 @@ const logActivity = require('../utils/activityLogger');
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
 
+// Helper function to convert Excel serial date to JS Date
+function excelDateToJSDate(serial) {
+  // Check if it's already a proper date string
+  if (typeof serial === 'string' && !isNaN(Date.parse(serial))) {
+    return serial;
+  }
+  
+  // Check if it's a number (Excel serial date)
+  if (typeof serial === 'number') {
+    // Excel serial date conversion
+    // Excel's epoch starts on January 1, 1900
+    // JavaScript's epoch starts on January 1, 1970
+    // But Excel incorrectly treats 1900 as a leap year, so we need to adjust
+    const excelEpoch = new Date(1900, 0, 1);
+    const jsDate = new Date(excelEpoch.getTime() + (serial - 2) * 24 * 60 * 60 * 1000);
+    return jsDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
+  }
+  
+  // If it's already a string, return as is
+  return serial;
+}
+
 const adminController = {
   async initializeAdmin() {
     try {
@@ -62,7 +84,7 @@ const adminController = {
       // Get admin from database
       const params = {
         TableName: process.env.ADMINS_TABLE,
-        Key: { email }
+        Key: { email: email }
       };
 
       const command = new GetCommand(params);
@@ -91,7 +113,7 @@ const adminController = {
 
       res.json({
         message: 'Login successful',
-        token,
+        token: token,
         admin: {
           email: admin.email,
           role: admin.role
@@ -116,7 +138,7 @@ const adminController = {
       const requiredFields = ['role', 'companyName', 'location', 'salary', 'jobDescription', 'originalLink', 'category', 'expiresOn'];
       for (const field of requiredFields) {
         if (!jobData[field]) {
-          return res.status(400).json({ error: `${field} is required` });
+          return res.status(400).json({ error: field + ' is required' });
         }
       }
 
@@ -248,7 +270,7 @@ const adminController = {
       // Check if category is being changed
       if (newCategory && newCategory !== oldCategory) {
         // Category is changing - we need to create a new item and delete the old one
-        console.log(`Moving job ${id} from category "${oldCategory}" to "${newCategory}"`);
+        console.log('Moving job ' + id + ' from category "' + oldCategory + '" to "' + newCategory + '"');
         
         // Create new item with updated category
         const newJobData = {
@@ -491,16 +513,27 @@ const adminController = {
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
         try {
+          // Process dates properly
+          const importantDates = {};
+          
+          if (row.applicationStart !== undefined) {
+            importantDates.applicationStart = excelDateToJSDate(row.applicationStart);
+          }
+          
+          if (row.applicationEnd !== undefined) {
+            importantDates.applicationEnd = excelDateToJSDate(row.applicationEnd);
+          }
+          
+          if (row.examDate !== undefined) {
+            importantDates.examDate = excelDateToJSDate(row.examDate);
+          }
+
           const job = {
             jobId: uuidv4(),
             postName: row.postName,
             organization: row.organization,
             advertisementNo: row.advertisementNo,
-            importantDates: {
-              applicationStart: row.applicationStart,
-              applicationEnd: row.applicationEnd,
-              examDate: row.examDate
-            },
+            importantDates: importantDates,
             applicationFee: row.applicationFee,
             vacancyDetails: row.vacancyDetails,
             eligibility: row.eligibility,
