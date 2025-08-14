@@ -20,7 +20,7 @@ A scalable, clutter-free job aggregation platform with AI-powered CV analysis an
 - **Frontend**: Next.js 14 (App Router), React, TypeScript, Tailwind CSS
 - **Backend**: Node.js, Express.js, TypeScript
 - **Database**: AWS DynamoDB (NoSQL)
-- **Caching**: Redis (AWS ElastiCache)
+- **Database**: DynamoDB (NoSQL)
 - **File Storage**: AWS S3
 - **Message Queue**: Apache Kafka
 - **AI Integration**: Google Gemini API
@@ -37,8 +37,8 @@ A scalable, clutter-free job aggregation platform with AI-powered CV analysis an
          │                       │                       │
          │                       ▼                       │
          │              ┌─────────────────┐              │
-         │              │     Redis       │              │
-         │              │     Cache       │              │
+         │              │      AWS S3     │              │
+         │              │   File Storage  │              │
          │              └─────────────────┘              │
          │                       │                       │
          ▼                       ▼                       ▼
@@ -80,7 +80,7 @@ jobquest-platform/
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Redis server
+- Node.js (18+)
 - AWS account (for DynamoDB, S3)
 - Google Gemini API key (optional for CV analysis)
 
@@ -127,8 +127,8 @@ SARKARI_JOBS_TABLE=SarkariJobs
 ADMINS_TABLE=Admins
 SUBSCRIPTIONS_TABLE=Subscriptions
 
-# Redis Configuration
-REDIS_URL=redis://localhost:6379
+# Additional Configuration
+# Add other environment variables as needed
 
 # External APIs (optional)
 GEMINI_API_KEY=your-gemini-api-key
@@ -155,25 +155,14 @@ API_BASE_URL=http://localhost:5000/api/v1
 
 ### Step 3: Start Required Services
 
-#### Start Redis (using Docker)
+#### Start the Application
 
 ```bash
-docker run -d -p 6379:6379 redis:alpine
-```
+# Install dependencies
+npm run install:all
 
-#### Or install Redis locally:
-
-**macOS:**
-```bash
-brew install redis
-brew services start redis
-```
-
-**Ubuntu/Debian:**
-```bash
-sudo apt update
-sudo apt install redis-server
-sudo systemctl start redis-server
+# Start development server
+npm run dev
 ```
 
 ### Step 4: Initialize Database (Development Mode)
@@ -272,7 +261,7 @@ curl -X POST http://localhost:5000/api/v1/admin/login \
 
 1. **DynamoDB Tables**: Create tables as per schema
 2. **S3 Bucket**: For CV file storage
-3. **ElastiCache**: Redis cluster for caching
+3. **CloudWatch**: Monitoring and logging
 4. **ECS/EC2**: For API deployment
 5. **CloudFront**: CDN for static assets
 
@@ -318,7 +307,7 @@ npm test
 
 ## 📈 Performance Optimization
 
-- **Caching**: Redis for API responses and frequent queries
+- **Performance**: Optimized DynamoDB queries and pagination
 - **CDN**: CloudFront for static assets
 - **Database**: DynamoDB with proper indexing
 - **Code Splitting**: Next.js automatic optimization

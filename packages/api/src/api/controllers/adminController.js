@@ -5,7 +5,7 @@ const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand, BatchWriteCommand, ScanCommand } = require('@aws-sdk/lib-dynamodb');
 const xlsx = require('xlsx');
 const fs = require('fs');
-const redisClient = require('../../services/redis');
+
 const logActivity = require('../utils/activityLogger');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
@@ -17,7 +17,7 @@ function excelDateToJSDate(serial) {
   if (typeof serial === 'string' && !isNaN(Date.parse(serial))) {
     return serial;
   }
-  
+
   // Check if it's a number (Excel serial date)
   if (typeof serial === 'number') {
     // Excel serial date conversion
@@ -28,7 +28,7 @@ function excelDateToJSDate(serial) {
     const jsDate = new Date(excelEpoch.getTime() + (serial - 2) * 24 * 60 * 60 * 1000);
     return jsDate.toISOString().split('T')[0]; // Return YYYY-MM-DD format
   }
-  
+
   // If it's already a string, return as is
   return serial;
 }
@@ -48,7 +48,7 @@ const adminController = {
       if (!result.Item) {
         // Create default admin user
         const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
-        
+
         const adminData = {
           email: process.env.ADMIN_EMAIL,
           password: hashedPassword,
@@ -63,7 +63,7 @@ const adminController = {
 
         const createCommand = new PutCommand(createParams);
         await docClient.send(createCommand);
-        
+
         console.log('✅ Default admin user created');
       } else {
         console.log('✅ Admin user already exists');
@@ -103,9 +103,9 @@ const adminController = {
 
       // Generate JWT token
       const token = jwt.sign(
-        { 
-          email: admin.email, 
-          role: admin.role 
+        {
+          email: admin.email,
+          role: admin.role
         },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN }
@@ -271,7 +271,7 @@ const adminController = {
       if (newCategory && newCategory !== oldCategory) {
         // Category is changing - we need to create a new item and delete the old one
         console.log('Moving job ' + id + ' from category "' + oldCategory + '" to "' + newCategory + '"');
-        
+
         // Create new item with updated category
         const newJobData = {
           ...existingJob,
@@ -308,24 +308,11 @@ const adminController = {
           });
         }
 
-        // Invalidate Redis cache for this job and all jobs lists
-        try {
-          // Delete job detail cache
-          await redisClient.del(`job:${id}`);
-          // Delete all jobs list caches (keys starting with jobs:)
-          if (redisClient.keys) {
-            const keys = await redisClient.keys('jobs:*');
-            if (Array.isArray(keys) && keys.length > 0) {
-              await redisClient.del(keys);
-            }
-          }
-        } catch (cacheErr) {
-          console.warn('Failed to invalidate jobs cache:', cacheErr);
-        }
 
-        res.json({ 
-          message: `Job updated successfully and moved from "${oldCategory}" to "${newCategory}"`, 
-          job: newJobData 
+
+        res.json({
+          message: `Job updated successfully and moved from "${oldCategory}" to "${newCategory}"`,
+          job: newJobData
         });
       } else {
         // Category is not changing - do normal update
@@ -333,7 +320,7 @@ const adminController = {
         let updateExpression = 'SET ';
         const expressionAttributeNames = {};
         const expressionAttributeValues = {};
-        
+
         Object.keys(updates).forEach((key, index) => {
           if (key !== 'jobId' && key !== 'category') { // Don't update keys
             updateExpression += `#${key} = :${key}`;
@@ -357,7 +344,7 @@ const adminController = {
 
         const command = new UpdateCommand(params);
         const result = await docClient.send(command);
-        
+
         // Log activity
         if (req.admin && req.admin.email) {
           await logActivity({
@@ -368,20 +355,8 @@ const adminController = {
           });
         }
 
-        // Invalidate Redis cache for this job and all jobs lists
-        try {
-          // Delete job detail cache
-          await redisClient.del(`job:${id}`);
-          // Delete all jobs list caches (keys starting with jobs:)
-          if (redisClient.keys) {
-            const keys = await redisClient.keys('jobs:*');
-            if (Array.isArray(keys) && keys.length > 0) {
-              await redisClient.del(keys);
-            }
-          }
-        } catch (cacheErr) {
-          console.warn('Failed to invalidate jobs cache:', cacheErr);
-        }
+
+
 
         res.json({ message: 'Job updated successfully', job: result.Attributes });
       }
@@ -425,20 +400,8 @@ const adminController = {
         await docClient.send(command);
       }
 
-      // Invalidate Redis cache for this job and all jobs lists
-      try {
-        // Delete job detail cache
-        await redisClient.del(`job:${id}`);
-        // Delete all jobs list caches (keys starting with jobs:)
-        if (redisClient.keys) {
-          const keys = await redisClient.keys('jobs:*');
-          if (Array.isArray(keys) && keys.length > 0) {
-            await redisClient.del(keys);
-          }
-        }
-      } catch (cacheErr) {
-        console.warn('Failed to invalidate jobs cache:', cacheErr);
-      }
+
+
       // Log activity
       if (req.admin && req.admin.email) {
         await logActivity({
@@ -515,15 +478,15 @@ const adminController = {
         try {
           // Process dates properly
           const importantDates = {};
-          
+
           if (row.applicationStart !== undefined) {
             importantDates.applicationStart = excelDateToJSDate(row.applicationStart);
           }
-          
+
           if (row.applicationEnd !== undefined) {
             importantDates.applicationEnd = excelDateToJSDate(row.applicationEnd);
           }
-          
+
           if (row.examDate !== undefined) {
             importantDates.examDate = excelDateToJSDate(row.examDate);
           }
@@ -612,7 +575,7 @@ const adminController = {
       let updateExpression = 'SET ';
       const expressionAttributeNames = {};
       const expressionAttributeValues = {};
-      
+
       Object.keys(updates).forEach((key, index) => {
         if (key !== 'jobId' && key !== 'organization') {
           updateExpression += `#${key} = :${key}`;
@@ -646,20 +609,8 @@ const adminController = {
         });
       }
 
-      // Invalidate Redis cache for this sarkari job and all sarkari jobs lists
-      try {
-        // Delete sarkari job detail cache
-        await redisClient.del(`sarkari-job:${id}`);
-        // Delete all sarkari jobs list caches (keys starting with sarkari-jobs:)
-        if (redisClient.keys) {
-          const keys = await redisClient.keys('sarkari-jobs:*');
-          if (Array.isArray(keys) && keys.length > 0) {
-            await redisClient.del(keys);
-          }
-        }
-      } catch (cacheErr) {
-        console.warn('Failed to invalidate sarkari jobs cache:', cacheErr);
-      }
+
+
 
       res.json({ message: 'Sarkari job updated successfully', job: result.Attributes });
     } catch (error) {
@@ -700,20 +651,8 @@ const adminController = {
       const command = new DeleteCommand(params);
       await docClient.send(command);
 
-      // Invalidate Redis cache for this sarkari job and all sarkari jobs lists
-      try {
-        // Delete sarkari job detail cache
-        await redisClient.del(`sarkari-job:${id}`);
-        // Delete all sarkari jobs list caches (keys starting with sarkari-jobs:)
-        if (redisClient.keys) {
-          const keys = await redisClient.keys('sarkari-jobs:*');
-          if (Array.isArray(keys) && keys.length > 0) {
-            await redisClient.del(keys);
-          }
-        }
-      } catch (cacheErr) {
-        console.warn('Failed to invalidate sarkari jobs cache:', cacheErr);
-      }
+
+
       // Log activity
       if (req.admin && req.admin.email) {
         await logActivity({

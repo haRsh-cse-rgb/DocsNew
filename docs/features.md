@@ -24,7 +24,7 @@ sidebar_label: Features & Best Practices
 ## Fast Filtering & Search
 
 - **DynamoDB Indexes:** GSIs on `location`, `batch`, and `status` for efficient queries.
-- **Redis Caching:** Cache frequent filter combinations (e.g., `category:Software,location:Bangalore`).
+- **Optimized Queries:** Efficient DynamoDB queries for frequent filter combinations (e.g., `category:Software,location:Bangalore`).
 - **Pagination:** Limit 15 jobs per page, use DynamoDB’s `LastEvaluatedKey`.
 - **Search:** Use DynamoDB’s `contains` for tags or full-text search with AWS OpenSearch (optional).
 
@@ -112,7 +112,7 @@ Performance
 
 Core Web Vitals: Use Next.js <Image> for optimization, SSR for fast loads, next/dynamic for code-splitting.
 Lazy Loading: Enabled for images and non-critical components.
-Caching: Redis for API responses, Next.js for static pages.
+Caching: Next.js for static pages and optimized DynamoDB queries.
 
 Security Considerations
 

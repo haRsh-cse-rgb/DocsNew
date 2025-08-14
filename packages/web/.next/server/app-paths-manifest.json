@@ -1,8 +1,8 @@
 {
-  "/government-jobs/page": "app/government-jobs/page.js",
-  "/internships/[id]/page": "app/internships/[id]/page.js",
-  "/walking/page": "app/walking/page.js",
-  "/jobs/category/[category]/page": "app/jobs/category/[category]/page.js",
   "/page": "app/page.js",
-  "/government-jobs/[id]/page": "app/government-jobs/[id]/page.js"
+  "/government-jobs/page": "app/government-jobs/page.js",
+  "/certifications/page": "app/certifications/page.js",
+  "/admin/login/page": "app/admin/login/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/admin/internships/page": "app/admin/internships/page.js"
 }

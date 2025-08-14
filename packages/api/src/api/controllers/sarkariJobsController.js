@@ -1,6 +1,6 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, ScanCommand } = require('@aws-sdk/lib-dynamodb');
-const redisClient = require('../../services/redis');
+
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -16,12 +16,6 @@ const sarkariJobsController = {
       } = req.query;
 
       const offset = (page - 1) * limit;
-      const cacheKey = `sarkari-jobs:${JSON.stringify(req.query)}`;
-      
-      const cachedResult = await redisClient.get(cacheKey);
-      if (cachedResult) {
-        return res.json(JSON.parse(cachedResult));
-      }
 
       let params = {
         TableName: process.env.SARKARI_JOBS_TABLE,
@@ -43,7 +37,7 @@ const sarkariJobsController = {
       const result = await docClient.send(command);
 
       let sortedJobs = result.Items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-      
+
       // Case-insensitive search filter in Node.js
       if (searchTerm) {
         const search = searchTerm.toLowerCase();
@@ -55,9 +49,9 @@ const sarkariJobsController = {
           );
         });
       }
-      
+
       const paginatedJobs = sortedJobs.slice(offset, offset + parseInt(limit));
-      
+
       const response = {
         jobs: paginatedJobs,
         pagination: {
@@ -69,7 +63,7 @@ const sarkariJobsController = {
         }
       };
 
-      await redisClient.setEx(cacheKey, 300, JSON.stringify(response));
+
       res.json(response);
     } catch (error) {
       console.error('Error fetching sarkari jobs:', error);
@@ -79,11 +73,7 @@ const sarkariJobsController = {
 
   async getSarkariResults(req, res) {
     try {
-      const cacheKey = 'sarkari-results';
-      const cachedResult = await redisClient.get(cacheKey);
-      if (cachedResult) {
-        return res.json(JSON.parse(cachedResult));
-      }
+
 
       const params = {
         TableName: process.env.SARKARI_JOBS_TABLE,
@@ -100,8 +90,8 @@ const sarkariJobsController = {
       const result = await docClient.send(command);
 
       const sortedResults = result.Items.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-      
-      await redisClient.setEx(cacheKey, 300, JSON.stringify(sortedResults));
+
+
       res.json(sortedResults);
     } catch (error) {
       console.error('Error fetching sarkari results:', error);
@@ -112,12 +102,7 @@ const sarkariJobsController = {
   async getSarkariJobById(req, res) {
     try {
       const { id } = req.params;
-      const cacheKey = `sarkari-job:${id}`;
-      
-      const cachedJob = await redisClient.get(cacheKey);
-      if (cachedJob) {
-        return res.json(JSON.parse(cachedJob));
-      }
+
 
       const params = {
         TableName: process.env.SARKARI_JOBS_TABLE,
@@ -135,7 +120,7 @@ const sarkariJobsController = {
       }
 
       const job = result.Items[0];
-      await redisClient.setEx(cacheKey, 600, JSON.stringify(job));
+
       res.json(job);
     } catch (error) {
       console.error('Error fetching sarkari job:', error);

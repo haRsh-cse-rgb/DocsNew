@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   # zookeeper:
   #   image: confluentinc/cp-zookeeper:7.5.0
@@ -18,13 +18,7 @@ services:
   #     KAFKA_BROKER_ID: 1
   #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
   #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092
-  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 
-
-  redis:
-    image: redis:7.2
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   api:
     build: ./packages/api
@@ -47,9 +41,7 @@ services:
       CERTIFICATIONS_TABLE: Certifications
       ADMINS_TABLE: Admins
       SUBSCRIPTIONS_TABLE: Subscriptions
-      REDIS_URL: redis://redis:6379
+
       ADMIN_EMAIL: admin@jobquest.com
       ADMIN_PASSWORD: admin123
     depends_on:
-      # - kafka
-      - redis

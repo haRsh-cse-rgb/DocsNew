@@ -1,6 +1,5 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const { DynamoDBDocumentClient, ScanCommand, GetCommand, QueryCommand } = require('@aws-sdk/lib-dynamodb');
-const redisClient = require('../../services/redis');
 
 const client = new DynamoDBClient({ region: process.env.AWS_REGION });
 const docClient = DynamoDBDocumentClient.from(client);
@@ -21,15 +20,8 @@ const jobsController = {
       } = req.query;
 
       const offset = (page - 1) * limit;
-      
-      // Create cache key
-      const cacheKey = `jobs:${JSON.stringify(req.query)}`;
-      
-      // Try to get from cache first
-      const cachedResult = await redisClient.get(cacheKey);
-      if (cachedResult) {
-        return res.json(JSON.parse(cachedResult));
-      }
+
+
 
       let params = {
         TableName: process.env.JOBS_TABLE,
@@ -71,12 +63,12 @@ const jobsController = {
         params.ExpressionAttributeValues[':tags'] = tags;
       }
 
-      
+
 
       if (searchTerm) {
         // Note: DynamoDB's contains function is case-sensitive, so we perform
         // case-insensitive search in Node.js after fetching results
-        
+
       }
 
       if (role) {
@@ -132,7 +124,7 @@ const jobsController = {
 
       // Paginate
       const paginatedJobs = filteredJobs.slice(offset, offset + parseInt(limit));
-      
+
       const response = {
         jobs: paginatedJobs,
         pagination: {
@@ -143,9 +135,6 @@ const jobsController = {
           hasPrev: page > 1
         }
       };
-
-      // Cache for 5 minutes
-      await redisClient.setEx(cacheKey, 300, JSON.stringify(response));
 
       res.json(response);
     } catch (error) {
@@ -158,12 +147,7 @@ const jobsController = {
     try {
       const { id } = req.params;
 
-      // Try cache first
-      const cacheKey = `job:${id}`;
-      const cachedJob = await redisClient.get(cacheKey);
-      if (cachedJob) {
-        return res.json(JSON.parse(cachedJob));
-      }
+
 
       // Since we need to search by jobId (sort key), we need to scan
       const params = {
@@ -182,9 +166,6 @@ const jobsController = {
       }
 
       const job = result.Items[0];
-
-      // Cache for 10 minutes (600 seconds)
-      await redisClient.setEx(cacheKey, 600, JSON.stringify(job));
 
       res.json(job);
     } catch (error) {
