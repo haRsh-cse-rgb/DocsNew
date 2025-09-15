@@ -72,7 +72,7 @@ export default function BulkUploadCertificationsPage() {
       const formData = new FormData();
       formData.append('file', file);
       const token = localStorage.getItem('adminToken');
-      const response = await axios.post('/api/certifications/bulk-upload', formData, {
+      const response = await axios.post('https://api.india-jobs.in/api/v1/certifications/bulk-upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           ...(token ? { Authorization: `Bearer ${token}` } : {})

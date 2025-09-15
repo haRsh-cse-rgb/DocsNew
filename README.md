@@ -126,6 +126,9 @@ JOBS_TABLE=Jobs
 SARKARI_JOBS_TABLE=SarkariJobs
 ADMINS_TABLE=Admins
 SUBSCRIPTIONS_TABLE=Subscriptions
+INTERNSHIPS_TABLE=Internships
+WALKING_TABLE=Walking
+CERTIFICATIONS_TABLE=Certifications
 
 # Additional Configuration
 # Add other environment variables as needed

@@ -27,7 +27,7 @@ export default function InternshipFilters({ filters, onFilterChange }: Internshi
   const fetchFilters = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/internships/filters`);
+      const response = await fetch(`https://api.india-jobs.in/api/v1/internships/filters`);
       const data = await response.json();
       
       if (data.success) {

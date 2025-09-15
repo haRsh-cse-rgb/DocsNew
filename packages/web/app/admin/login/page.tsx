@@ -23,7 +23,7 @@ export default function AdminLogin() {
     try {
       setLoading(true);
 
-      const { data } = await axios.post('/api/admin/login', { email, password });
+      const { data } = await axios.post('https://api.india-jobs.in/api/v1/admin/login', { email, password });
 
       // Store token in localStorage (in production, use httpOnly cookies)
       localStorage.setItem('adminToken', data.token);
@@ -70,7 +70,7 @@ export default function AdminLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="input-field"
-                  placeholder="admin@jobquest.com"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>
@@ -116,11 +116,11 @@ export default function AdminLogin() {
               </div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
+            {/* <div className="mt-4 text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
               <p className="font-medium mb-2">For testing purposes:</p>
               <p>Email: admin@jobquest.com</p>
               <p>Password: admin123</p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

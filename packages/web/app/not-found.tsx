@@ -1,7 +1,17 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+
+export const metadata: Metadata = {
+  title: '404 - Page Not Found | India Jobs',
+  description: 'The page you are looking for could not be found. Return to India Jobs homepage to find your dream job opportunities.',
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function NotFound() {
   return (

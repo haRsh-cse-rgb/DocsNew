@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import FloatingSocialButtons from './components/FloatingSocialButtons';
+import Script from 'next/script'; // ✅ Import Script
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -60,17 +61,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
-        <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#ffffff" />
+        {/* ✅ Google Analytics Script */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-3NB12Q3DQE"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-3NB12Q3DQE');
+          `}
+        </Script>
       </head>
       <body className={inter.className}>
         {children}
         <FloatingSocialButtons />
-        <Toaster 
+        <Toaster
           position="top-right"
           toastOptions={{
             duration: 4000,

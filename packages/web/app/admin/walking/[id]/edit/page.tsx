@@ -68,7 +68,7 @@ export default function EditWalkingPage() {
   const fetchWalking = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/walking/${id}`);
+      const response = await fetch(`https://api.india-jobs.in/api/v1/walking/${id}`);
       const data = await response.json();
       
       if (data.success) {
@@ -99,7 +99,7 @@ export default function EditWalkingPage() {
     setSaving(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/walking/${id}`, {
+      const response = await fetch(`https://api.india-jobs.in/api/v1/walking/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

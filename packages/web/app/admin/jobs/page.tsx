@@ -49,7 +49,7 @@ export default function JobsManagement() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/jobs?limit=100');
+      const response = await axios.get('https://api.india-jobs.in/api/v1/jobs?limit=100');
       setJobs(response.data.jobs || []);
     } catch (error) {
       console.error('Error fetching jobs:', error);
@@ -65,7 +65,7 @@ export default function JobsManagement() {
     try {
       setDeletingId(jobId);
       const token = localStorage.getItem('adminToken');
-      await axios.delete(`/api/admin/jobs/${jobId}`, {
+      await axios.delete(`https://api.india-jobs.in/api/v1/admin/jobs/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

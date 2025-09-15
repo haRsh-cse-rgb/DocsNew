@@ -53,7 +53,7 @@ export default function NewsletterModal({ isOpen, onClose }: NewsletterModalProp
     try {
       setLoading(true);
 
-      const response = await axios.post('/api/subscribe', {
+      const response = await axios.post('https://api.india-jobs.in/api/v1/subscription/subscribe', {
         email,
         categories: selectedCategories,
       });

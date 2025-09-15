@@ -55,7 +55,7 @@ export default function InternshipsManagement() {
   const fetchInternships = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/internships?limit=100');
+      const response = await axios.get('https://api.india-jobs.in/api/v1/internships?limit=100');
       setInternships(response.data.internships || []);
     } catch (error) {
       console.error('Error fetching internships:', error);
@@ -71,7 +71,7 @@ export default function InternshipsManagement() {
     try {
       setDeletingId(internshipId);
       const token = localStorage.getItem('adminToken');
-      await axios.delete(`/api/admin/internships/${internshipId}`, {
+      await axios.delete(`https://api.india-jobs.in/api/v1/internships/${internshipId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

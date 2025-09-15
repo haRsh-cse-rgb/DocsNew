@@ -30,7 +30,7 @@ export default function EditInternshipPage() {
   useEffect(() => {
     async function fetchInternship() {
       try {
-        const res = await axios.get(`/api/internships/${id}`);
+        const res = await axios.get(`https://api.india-jobs.in/api/v1/internships/${id}`);
         const data = res.data.internship;
         setForm({
           title: data.title || "",
@@ -69,7 +69,7 @@ export default function EditInternshipPage() {
         skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
         batch: form.batch.split(",").map((b) => b.trim()).filter(Boolean),
       };
-      await axios.put(`/api/internships/${id}`, payload, {
+      await axios.put(`https://api.india-jobs.in/api/v1/internships/${id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Internship updated successfully");

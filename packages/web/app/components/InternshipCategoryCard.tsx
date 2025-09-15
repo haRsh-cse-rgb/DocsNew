@@ -35,6 +35,8 @@ interface InternshipCategoryCardProps {
 }
 
 export default function InternshipCategoryCard({ internship }: InternshipCategoryCardProps) {
+  const [copied, setCopied] = useState(false);
+
   let timeAgo = 'Unknown';
   if (internship.postedAt) {
     const postedDate = new Date(internship.postedAt);
@@ -42,6 +44,20 @@ export default function InternshipCategoryCard({ internship }: InternshipCategor
       timeAgo = formatDistanceToNow(postedDate, { addSuffix: true });
     }
   }
+
+  const shareMessage = `${internship.company} is offering an internship for ${internship.title}${
+    internship.stipend ? ` — Stipend: ${internship.stipend}` : ''
+  }. Apply here: ${typeof window !== 'undefined' ? window.location.origin : ''}/internships/${internship.id}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(shareMessage);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy text: ', error);
+    }
+  };
 
   return (
     <div className="card hover:shadow-lg transition-all duration-300 group">
@@ -54,7 +70,7 @@ export default function InternshipCategoryCard({ internship }: InternshipCategor
                 internship.companyLogo ||
                 (internship.company
                   ? `https://logo.clearbit.com/${internship.company.toLowerCase().replace(/\s+/g, '')}.com`
-                  : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjM0I4MkY2Ii8+Cjx0ZXh0IHg9IjMyIiB5PSIzOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkk8L3RleHQ+Cjwvc3ZnPgo=')
+                  : 'data:image/svg+xml;base64,...')
               }
               alt={`${internship.company || 'Internship'} logo`}
               width={64}
@@ -62,7 +78,8 @@ export default function InternshipCategoryCard({ internship }: InternshipCategor
               className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjM0I4MkY2Ii8+Cjx0ZXh0IHg9IjMyIiB5PSIzOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkk8L3RleHQ+Cjwvc3ZnPgo=';
+                target.src =
+                  'data:image/svg+xml;base64,...';
               }}
             />
           </div>
@@ -91,7 +108,7 @@ export default function InternshipCategoryCard({ internship }: InternshipCategor
             </div>
           </div>
 
-          {/* Batch Information */}
+          {/* Batch Info */}
           {internship.batch && internship.batch.length > 0 && (
             <div className="mb-4">
               <span className="text-sm text-gray-600">Suitable for: </span>
@@ -103,7 +120,7 @@ export default function InternshipCategoryCard({ internship }: InternshipCategor
             </div>
           )}
 
-          {/* Internship Meta Information */}
+          {/* Meta Info */}
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
             <div className="flex items-center space-x-1">
               <MapPinIcon className="h-4 w-4" />
@@ -112,10 +129,6 @@ export default function InternshipCategoryCard({ internship }: InternshipCategor
             <div className="flex items-center space-x-1">
               <CurrencyDollarIcon className="h-4 w-4" />
               <span>{internship.stipend}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <CalendarIcon className="h-4 w-4" />
-              <span>{internship.duration}</span>
             </div>
             <div className="flex items-center space-x-1">
               <CalendarIcon className="h-4 w-4" />
@@ -147,9 +160,15 @@ export default function InternshipCategoryCard({ internship }: InternshipCategor
             >
               View Details
             </Link>
+            <button
+              onClick={handleCopy}
+              className="btn-primary flex-1"
+            >
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

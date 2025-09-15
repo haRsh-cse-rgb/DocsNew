@@ -45,7 +45,7 @@ export default function NewWalkingPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/walking`, {
+      const response = await fetch(`https://api.india-jobs.in/api/v1/walking`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

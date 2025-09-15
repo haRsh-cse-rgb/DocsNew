@@ -32,7 +32,7 @@ export default function Navbar() {
     // Fetch categories from backend for jobs
     async function fetchCategories() {
       try {
-        const response = await axios.get('/api/jobs?limit=1000'); // adjust as needed
+        const response = await axios.get('https://api.india-jobs.in/api/v1/jobs?limit=1000'); // adjust as needed
         const jobs: any[] = response.data.jobs || [];
         const uniqueCategories: string[] = Array.from(new Set(jobs.map((j: any) => j.category).filter((cat: any): cat is string => typeof cat === 'string' && !!cat)));
         setCategories(uniqueCategories);
@@ -47,7 +47,7 @@ export default function Navbar() {
     // Fetch categories from backend for internships
     async function fetchInternshipCategories() {
       try {
-        const response = await axios.get('/api/internships?limit=1000');
+        const response = await axios.get('https://api.india-jobs.in/api/v1/internships?limit=1000');
         const internships: any[] = response.data.internships || [];
         const uniqueCategories: string[] = Array.from(new Set(internships.map((i: any) => i.category).filter((cat: any): cat is string => typeof cat === 'string' && !!cat)));
         setInternshipCategories(uniqueCategories);
@@ -142,42 +142,63 @@ export default function Navbar() {
               Walk-In Jobs
             </Link>
             <div className="relative">
-              <button
-                className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 flex items-center space-x-1"
-                onClick={() => setShowInternshipCategories((v) => !v)}
-                type="button"
-              >
-                Internships
-                <svg className="h-4 w-4 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-              </button>
-              {showInternshipCategories && (
-                <div
-                  className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50"
-                >
-                  {internshipCategories.length === 0 ? (
-                    <div className="px-4 py-2 text-gray-500">No categories</div>
-                  ) : (
-                    internshipCategories.map((cat) => (
-                      <Link
-                        key={cat}
-                        href={`/internships/category/${encodeURIComponent(cat)}`}
-                        className="block px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
-                        onClick={() => setShowInternshipCategories(false)}
-                      >
-                        {cat}
-                      </Link>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
+  <button
+    className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 flex items-center space-x-1"
+    onClick={() => setShowInternshipCategories((v) => !v)}
+    type="button"
+  >
+    Internships
+    <svg
+      className="h-4 w-4 ml-1"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  </button>
+
+  {showInternshipCategories && (
+    <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+      {/* ✅ "All" option at top */}
+      <Link
+        href="/internships"
+        className="block px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+        onClick={() => setShowInternshipCategories(false)}
+      >
+        All
+      </Link>
+
+      {internshipCategories.length === 0 ? (
+        <div className="px-4 py-2 text-gray-500">No categories</div>
+      ) : (
+        internshipCategories.map((cat) => (
+          <Link
+            key={cat}
+            href={`/internships/category/${encodeURIComponent(cat)}`}
+            className="block px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-700 transition-colors"
+            onClick={() => setShowInternshipCategories(false)}
+          >
+            {cat}
+          </Link>
+        ))
+      )}
+    </div>
+  )}
+</div>
+
             
-            <Link 
+            {/* <Link 
               href="/admin/login" 
               className="btn-primary"
             >
               Admin Login
-            </Link>
+            </Link> */}
           </div>
 
           {/* Mobile menu button */}
@@ -241,13 +262,13 @@ export default function Navbar() {
               >
                 Results
               </Link> */}
-              <Link 
+              {/* <Link 
                 href="/admin/login" 
                 className="btn-primary inline-block text-center"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Admin Login
-              </Link>
+              </Link> */}
             </div>
           </div>
         )}

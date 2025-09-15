@@ -31,7 +31,7 @@ export default function JobGrid() {
       const params = new URLSearchParams(url.search);
       params.set('page', page.toString());
       params.set('limit', '20');
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL || '/api'}/jobs?${params.toString()}`);
+      const response = await axios.get(`https://api.india-jobs.in/api/v1/jobs?${params.toString()}`);
       if (response.status !== 200) {
         throw new Error('Failed to fetch jobs');
       }

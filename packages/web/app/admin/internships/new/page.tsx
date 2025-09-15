@@ -44,7 +44,7 @@ export default function NewInternship() {
         skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
       };
       await axios.post(
-        "/api/internships",
+        "https://api.india-jobs.in/api/v1/internships",
         payload,
         {
           headers: {

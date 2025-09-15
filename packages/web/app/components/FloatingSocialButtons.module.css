@@ -55,7 +55,7 @@
 @media (max-width: 600px) {
   .floatingButtons {
     bottom: 16px;
-    right: 16px;
+    right: 10px;
     gap: 10px;
   }
   .floatingButton {

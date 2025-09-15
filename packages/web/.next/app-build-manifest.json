@@ -5,36 +5,31 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/not-found": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/not-found.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/jobs/category/[category]/page": [
+    "/not-found": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/jobs/category/[category]/page.js"
-    ],
-    "/walking/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/walking/page.js"
-    ],
-    "/government-jobs/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/government-jobs/page.js"
+      "static/chunks/app/not-found.js"
     ],
     "/certifications/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/certifications/page.js"
+    ],
+    "/jobs/category/[category]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/jobs/category/[category]/page.js"
+    ],
+    "/internships/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/internships/page.js"
     ],
     "/admin/login/page": [
       "static/chunks/webpack.js",
@@ -46,10 +41,60 @@
       "static/chunks/main-app.js",
       "static/chunks/app/admin/dashboard/page.js"
     ],
-    "/admin/internships/page": [
+    "/admin/jobs/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/admin/internships/page.js"
+      "static/chunks/app/admin/jobs/page.js"
+    ],
+    "/admin/jobs/new/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/jobs/new/page.js"
+    ],
+    "/jobs/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/jobs/[id]/page.js"
+    ],
+    "/internships/category/[category]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/internships/category/[category]/page.js"
+    ],
+    "/government-jobs/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/government-jobs/page.js"
+    ],
+    "/government-jobs/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/government-jobs/[id]/page.js"
+    ],
+    "/walking/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/walking/page.js"
+    ],
+    "/admin/certifications/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/certifications/page.js"
+    ],
+    "/admin/sarkari-jobs/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/sarkari-jobs/page.js"
+    ],
+    "/admin/sarkari-jobs/new/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/sarkari-jobs/new/page.js"
+    ],
+    "/admin/sarkari-jobs/bulk/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/sarkari-jobs/bulk/page.js"
     ]
   }
 }

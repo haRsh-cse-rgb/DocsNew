@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import styles from './FloatingSocialButtons.module.css';
 
 const iconData = [
-  { name: 'WhatsApp', href: 'https://chat.whatsapp.com/your-group-link', icon: '/whatsaap.svg' },
-  { name: 'Telegram', href: 'https://t.me/your-group-link', icon: '/telegram.svg' },
-  { name: 'Instagram', href: 'https://instagram.com/your-profile', icon: '/instagram.svg' },
+  { name: 'WhatsApp', href: 'https://chat.whatsapp.com/EZ4w1JWnHPZBVPIiPfRclM?mode=ems_share_t', icon: '/whatsaap.svg' },
+  { name: 'LinkedIn', href: 'https://www.linkedin.com/company/i-india-jobs/?viewAsMember=true', icon: '/linkedin.svg' },
+  { name: 'Instagram', href: 'https://www.instagram.com/indiajobs.path?igsh=b2RmeWRmbGNqNWV3', icon: '/instagram.svg' },
 ];
 
 const FloatingSocialButtons: React.FC = () => {

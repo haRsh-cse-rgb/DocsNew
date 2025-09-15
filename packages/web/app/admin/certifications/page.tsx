@@ -31,7 +31,7 @@ export default function AdminCertificationsPage() {
   const fetchCertifications = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/certifications');
+      const response = await axios.get('https://api.india-jobs.in/api/v1/certifications');
       setCertifications(response.data.certifications);
       setError(null);
     } catch (err) {
@@ -50,7 +50,7 @@ export default function AdminCertificationsPage() {
     try {
       setDeletingId(id);
       const token = localStorage.getItem('adminToken');
-      await axios.delete(`/api/certifications/${id}`, {
+      await axios.delete(`https://api.india-jobs.in/api/v1/certifications/${id}`, {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }

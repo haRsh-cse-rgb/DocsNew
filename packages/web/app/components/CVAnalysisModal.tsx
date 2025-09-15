@@ -88,7 +88,7 @@ export default function CVAnalysisModal({ isOpen, onClose, job, isInternship = f
       setUploading(true);
 
       // Step 1: Get pre-signed URL
-      const urlResponse = await axios.get('/api/s3/pre-signed-url?fileType=' + encodeURIComponent(file.type));
+      const urlResponse = await axios.get('https://api.india-jobs.in/api/v1/s3/pre-signed-url?fileType=' + encodeURIComponent(file.type));
       const { uploadUrl, key } = urlResponse.data;
 
       // Step 2: Upload file to S3
@@ -102,7 +102,7 @@ export default function CVAnalysisModal({ isOpen, onClose, job, isInternship = f
       setAnalyzing(true);
 
       // Step 3: Analyze CV
-      const analysisResponse = await axios.post('/api/ai/analyze-cv', {
+      const analysisResponse = await axios.post('https://api.india-jobs.in/api/v1/ai/analyze-cv', {
         ...(isInternship ? { internshipId: job.jobId } : { jobId: job.jobId }),
         cvS3Key: key,
       });

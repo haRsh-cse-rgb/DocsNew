@@ -10,13 +10,13 @@ const nextConfig = {
     ],
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1',
+    NEXT_PUBLIC_API_URL: 'https://api.india-jobs.in',
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api/v1'}/:path*`,
+        destination: 'https://api.india-jobs.in/:path*',
       },
     ];
   },

@@ -32,7 +32,7 @@ export default function BulkUploadWalkingPage() {
     formData.append('file', file);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/walking/bulk-upload`, {
+      const response = await fetch(`https://api.india-jobs.in/api/v1/walking/bulk-upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken')}`

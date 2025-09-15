@@ -10,11 +10,14 @@ const PORT = process.env.PORT || 5001;
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.com'] 
-    : ['http://localhost:3000'],
+  origin: [
+    'http://localhost:3000',       // local dev
+    'https://india-jobs.in',     // production frontend
+    'https://api.india-jobs.in'    // if you want to allow direct API calls
+  ],
   credentials: true
 }));
+
 
 // Rate limiting - more restrictive for sensitive endpoints
 const sensitiveLimiter = rateLimit({

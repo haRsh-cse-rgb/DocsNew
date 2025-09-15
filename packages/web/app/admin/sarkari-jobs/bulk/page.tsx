@@ -52,7 +52,7 @@ export default function BulkUploadSarkariJobs() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.post('/api/admin/sarkari-jobs/bulk', formData, {
+      const response = await axios.post('https://api.india-jobs.in/api/v1/admin/sarkari-jobs/bulk', formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'

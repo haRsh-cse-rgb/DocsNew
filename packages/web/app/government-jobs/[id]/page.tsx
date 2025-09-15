@@ -22,7 +22,7 @@ function parseBullets(str?: string): string[] {
 
 async function getSarkariJob(id: string) {
   try {
-    const res = await axios.get(`${process.env.API_BASE_URL || 'http://localhost:5001/api/v1'}/sarkari-jobs/${id}`);
+    const res = await axios.get(`https://api.india-jobs.in/api/v1/sarkari-jobs/${id}`);
     return res.data;
   } catch {
     return null;
@@ -31,10 +31,71 @@ async function getSarkariJob(id: string) {
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const job = await getSarkariJob(params.id);
-  const title = job?.postName || 'Government Job Details';
+  
+  if (!job) {
+    return {
+      title: 'Government Job Not Found | India Jobs',
+      description: 'The requested government job could not be found. Browse other government job opportunities on India Jobs.',
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const postName = job.postName || 'Government Job';
+  const organization = job.organization || 'Government Organization';
+  const description = job.description || 'View government job details and apply for this position.';
+  
+  // Create a more detailed description
+  const detailedDescription = `${postName} at ${organization}. ${description.substring(0, 150)}...`;
+  
+  // Create keywords from job data
+  const keywords = [
+    postName,
+    organization,
+    'government jobs',
+    'sarkari naukri',
+    'government vacancies',
+    'public sector jobs',
+    'government recruitment',
+    'India government jobs'
+  ].filter(Boolean).join(', ');
+
   return {
-    title: `${title} - India Jobs`,
-    description: job?.description || 'View government job details and apply for this position.',
+    title: `${postName} at ${organization} - Government Job | India Jobs`,
+    description: detailedDescription,
+    keywords: keywords,
+    authors: [{ name: 'India Jobs Team' }],
+    openGraph: {
+      title: `${postName} at ${organization}`,
+      description: detailedDescription,
+      type: 'website',
+      locale: 'en_US',
+      url: `https://india-jobs.in/government-jobs/${params.id}`,
+      siteName: 'India Jobs',
+      images: [
+        {
+          url: '/IndiaJobs.png',
+          width: 1200,
+          height: 630,
+          alt: `${postName} at ${organization}`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${postName} at ${organization}`,
+      description: detailedDescription,
+      images: ['/IndiaJobs.png'],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    alternates: {
+      canonical: `https://india-jobs.in/government-jobs/${params.id}`,
+    },
   };
 }
 
@@ -149,7 +210,7 @@ export default async function GovernmentJobDetailPage({ params }: { params: { id
               </td>
             </tr>
             <tr>
-              <td className="font-semibold py-3 px-4 border-b border-gray-100 align-top">Eligibility</td>
+              {/* <td className="font-semibold py-3 px-4 border-b border-gray-100 align-top">Eligibility</td>
               <td className="py-3 px-4 border-b border-gray-100">
                 {eligibilityBullets ? (
                   <ul className="list-disc pl-5 space-y-1">
@@ -160,7 +221,21 @@ export default async function GovernmentJobDetailPage({ params }: { params: { id
                 ) : (
                   <span>{job.eligibility || '-'}</span>
                 )}
-              </td>
+              </td> */}
+
+<td className="font-semibold py-3 px-4 border-b border-gray-100 align-top">
+  Eligibility
+</td>
+<td className="py-3 px-4 border-b border-gray-100">
+  <ul className="list-disc pl-5 space-y-1">
+    {(eligibilityBullets || job.eligibility?.split(";")).map((item, idx) => (
+      <li key={idx} className="text-gray-800">
+        {item.trim()}
+      </li>
+    ))}
+  </ul>
+</td>
+
             </tr>
             <tr className="bg-gray-50">
               <td className="font-semibold py-3 px-4 border-b border-gray-100">Official Website</td>

@@ -59,7 +59,7 @@ export default function CreateJob() {
         batch: formData.batch ? formData.batch.split(',').map(batch => batch.trim()) : []
       };
 
-      await axios.post('/api/admin/jobs', jobData, {
+      await axios.post('https://api.india-jobs.in/api/v1/admin/jobs', jobData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

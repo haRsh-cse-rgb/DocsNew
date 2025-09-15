@@ -65,7 +65,7 @@ export default function AdminDashboard() {
       try {
         const token = localStorage.getItem('adminToken');
         if (!token) return;
-        const response = await axios.get('/api/admin/stats', {
+        const response = await axios.get('https://api.india-jobs.in/api/v1/admin/stats', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setStats(response.data);
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) throw new Error('Not authenticated');
-      await axios.post('/api/admin/admins', newAdmin, {
+      await axios.post('https://api.india-jobs.in/api/v1/admin/admins', newAdmin, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Admin created successfully');

@@ -60,7 +60,7 @@ export default function BulkUploadInternships() {
       }
       const formData = new FormData();
       formData.append('file', file);
-      const response = await axios.post('/api/internships/bulk-upload', formData, {
+      const response = await axios.post('https://api.india-jobs.in/api/v1/internships/bulk-upload', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'

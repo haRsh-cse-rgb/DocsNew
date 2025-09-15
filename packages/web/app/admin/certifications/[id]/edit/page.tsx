@@ -36,7 +36,7 @@ export default function EditCertificationPage() {
   const fetchCertification = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`/api/certifications/${id}`);
+      const response = await axios.get(`https://api.india-jobs.in/api/v1/certifications/${id}`);
       const certification = response.data.certification;
       
       setFormData({
@@ -66,7 +66,7 @@ export default function EditCertificationPage() {
         category: formData.category === 'Other' ? customCategory : formData.category
       };
       
-      await axios.put(`/api/certifications/${id}`, finalFormData, {
+      await axios.put(`https://api.india-jobs.in/api/v1/certifications/${id}`, finalFormData, {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }

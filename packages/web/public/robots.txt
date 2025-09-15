@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Allow crawling of main pages
+Allow: /jobs/
+Allow: /internships/
+Allow: /government-jobs/
+Allow: /certifications/
+Allow: /walking/
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+
+# Disallow private or sensitive areas
+Disallow: /_next/
+Disallow: /uploads/
+
+# Sitemap location
+Sitemap: https://yourdomain.com/sitemap.xml
+
+# Crawl delay (optional - be respectful to server)
+Crawl-delay: 1

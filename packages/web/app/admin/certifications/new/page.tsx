@@ -29,7 +29,7 @@ export default function NewCertificationPage() {
         category: formData.category === 'Other' ? customCategory : formData.category
       };
       
-      await axios.post('/api/certifications', finalFormData, {
+      await axios.post('https://api.india-jobs.in/api/v1/certifications', finalFormData, {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }

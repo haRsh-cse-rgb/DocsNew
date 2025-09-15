@@ -25,7 +25,7 @@ export default function WalkingFilters({ filters, onFilterChange }: WalkingFilte
   const fetchFilters = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/walking/filters`);
+      const response = await fetch(`https://api.india-jobs.in/api/v1/walking/filters`);
       const data = await response.json();
       
       if (data.success) {

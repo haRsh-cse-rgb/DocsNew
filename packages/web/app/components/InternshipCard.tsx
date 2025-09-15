@@ -7,8 +7,9 @@ import {
   MapPinIcon, 
   CurrencyDollarIcon, 
   CalendarIcon,
-  ArrowTopRightOnSquareIcon,
-  BuildingOfficeIcon
+  BuildingOfficeIcon,
+  ShareIcon,
+  ClipboardDocumentCheckIcon
 } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -36,6 +37,8 @@ interface InternshipCardProps {
 }
 
 export default function InternshipCard({ internship }: InternshipCardProps) {
+  const [copied, setCopied] = useState(false);
+
   let timeAgo = 'Unknown';
   if (internship.postedAt) {
     const postedDate = new Date(internship.postedAt);
@@ -43,6 +46,22 @@ export default function InternshipCard({ internship }: InternshipCardProps) {
       timeAgo = formatDistanceToNow(postedDate, { addSuffix: true });
     }
   }
+
+  const handleShare = async () => {
+    const message = `${internship.company} is offering an internship for ${internship.title}.
+Stipend: ${internship.stipend || 'Not specified'}
+
+
+Apply here: ${window.location.origin}/internships/${internship.id}`;
+
+    try {
+      await navigator.clipboard.writeText(message);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy text: ', error);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 group h-full flex flex-col">
@@ -56,16 +75,12 @@ export default function InternshipCard({ internship }: InternshipCardProps) {
                 internship.companyLogo ||
                 (internship.company
                   ? `https://logo.clearbit.com/${internship.company.toLowerCase().replace(/\s+/g, '')}.com`
-                  : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjM0I4MkY2Ii8+Cjx0ZXh0IHg9IjMyIiB5PSIzOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkk8L3RleHQ+Cjwvc3ZnPgo=')
+                  : 'data:image/svg+xml;base64,...')
               }
               alt={`${internship.company || 'Internship'} logo`}
               width={64}
               height={64}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjM0I4MkY2Ii8+Cjx0ZXh0IHg9IjMyIiB5PSIzOCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE4IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkk8L3RleHQ+Cjwvc3ZnPgo=';
-              }}
             />
           </div>
         </div>
@@ -141,15 +156,31 @@ export default function InternshipCard({ internship }: InternshipCardProps) {
         </div>
       )}
 
-      {/* Action Button */}
-      <div className="mt-auto">
+      {/* Action Buttons */}
+      <div className="mt-auto flex flex-col sm:flex-row gap-3">
         <Link
           href={`/internships/${internship.id}`}
           className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-center block"
         >
           View Details
         </Link>
+        <button
+          onClick={handleShare}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+        >
+          {copied ? (
+            <>
+              <ClipboardDocumentCheckIcon className="h-5 w-5 mr-2" />
+              Copied!
+            </>
+          ) : (
+            <>
+              <ShareIcon className="h-5 w-5 mr-2" />
+              Copy Link
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
-} 
+}

@@ -51,7 +51,7 @@ export default function SarkariJobsManagement() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/sarkari-jobs?limit=100');
+      const response = await axios.get('https://api.india-jobs.in/api/v1/sarkari-jobs?limit=100');
       setJobs(response.data.jobs || []);
     } catch (error) {
       console.error('Error fetching sarkari jobs:', error);
@@ -67,7 +67,7 @@ export default function SarkariJobsManagement() {
     try {
       setDeletingId(jobId);
       const token = localStorage.getItem('adminToken');
-      await axios.delete(`/api/admin/sarkari-jobs/${jobId}`, {
+      await axios.delete(`https://api.india-jobs.in/api/v1/admin/sarkari-jobs/${jobId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

@@ -55,7 +55,7 @@ export default function CreateSarkariJob() {
         }
       };
 
-      await axios.post('/api/admin/sarkari-jobs', jobData, {
+      await axios.post('https://api.india-jobs.in/api/v1/admin/sarkari-jobs', jobData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

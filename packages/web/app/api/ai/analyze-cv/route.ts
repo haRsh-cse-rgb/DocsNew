@@ -7,8 +7,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('Request body:', body);
     
-    // Forward the request to the backend API
-    const backendUrl = 'http://localhost:5001/api/v1/ai/analyze-cv';
+    // Forward the request to the backend API /api/v1/ai/analyze-cv
+    const backendUrl = 'https://api.india-jobs.in/api/v1/ai/analyze-cv';
     console.log('Forwarding to:', backendUrl);
     
     const response = await fetch(backendUrl, {

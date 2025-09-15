@@ -30,7 +30,7 @@ export default function EditJob() {
     const fetchJob = async () => {
       try {
         setFetching(true);
-        const response = await axios.get(`/api/jobs/${jobId}`);
+        const response = await axios.get(`https://api.india-jobs.in/api/v1/jobs/${jobId}`);
         const job = response.data;
         setFormData({
           role: job.role || "",
@@ -86,7 +86,7 @@ export default function EditJob() {
         tags: formData.tags ? formData.tags.split(",").map(tag => tag.trim()) : [],
         batch: formData.batch ? formData.batch.split(",").map(batch => batch.trim()) : []
       };
-      await axios.put(`/api/admin/jobs/${jobId}`, jobData, {
+      await axios.put(`https://api.india-jobs.in/api/v1/admin/jobs/${jobId}`, jobData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success("Job updated successfully!");

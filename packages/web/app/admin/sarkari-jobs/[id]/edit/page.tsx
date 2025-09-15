@@ -32,7 +32,7 @@ export default function EditSarkariJob() {
     const fetchJob = async () => {
       try {
         setFetching(true);
-        const response = await axios.get(`/api/sarkari-jobs/${jobId}`);
+        const response = await axios.get(`https://api.india-jobs.in/api/v1/sarkari-jobs/${jobId}`);
         const job = response.data;
         setFormData({
           postName: job.postName || "",
@@ -84,7 +84,7 @@ export default function EditSarkariJob() {
           examDate: formData.examDate
         }
       };
-      await axios.put(`/api/admin/sarkari-jobs/${jobId}`, jobData, {
+      await axios.put(`https://api.india-jobs.in/api/v1/admin/sarkari-jobs/${jobId}`, jobData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success("Government job updated successfully!");
