@@ -1,12 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'images.pexels.com',
-      'technocorps.com',
-      'logo.clearbit.com',
-      'example.com',
-      'cdn.pixabay.com'
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**', // <-- allows any domain over HTTPS
+      },
     ],
   },
   env: {

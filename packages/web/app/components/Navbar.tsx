@@ -129,19 +129,7 @@ export default function Navbar() {
             >
               Government Jobs
             </Link>
-            <Link 
-              href="/certifications"
-              className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
-            >
-              Certifications
-            </Link>
-            <Link 
-              href="/walking"
-              className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
-            >
-              Walk-In Jobs
-            </Link>
-            <div className="relative">
+            <div className="relative inline-block">
   <button
     className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200 flex items-center space-x-1"
     onClick={() => setShowInternshipCategories((v) => !v)}
@@ -158,13 +146,12 @@ export default function Navbar() {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M19 9l-7 7-7-7"
-      />
+        d="M19 9l-7 7-7-7" />
     </svg>
   </button>
 
   {showInternshipCategories && (
-    <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+    <div className="absolute left-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg max-h-96 overflow-y-auto shadow-lg z-50">
       {/* ✅ "All" option at top */}
       <Link
         href="/internships"
@@ -190,6 +177,24 @@ export default function Navbar() {
       )}
     </div>
   )}
+</div>
+
+
+            <Link 
+              href="/certifications"
+              className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
+            >
+              
+              Certifications
+            </Link>
+            <Link 
+              href="/walking"
+              className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
+            >
+              Walk-In Jobs
+            </Link>
+            <div className="relative">
+  
 </div>
 
             
@@ -235,6 +240,13 @@ export default function Navbar() {
                 Government Jobs
               </Link>
               <Link 
+                href="/internships" 
+                className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Internships
+              </Link>
+              <Link 
                 href="/certifications" 
                 className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
@@ -248,13 +260,13 @@ export default function Navbar() {
               >
                 Walking
               </Link>
-              <Link 
+              {/* <Link 
                 href="/internships" 
                 className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Internships
-              </Link>
+              </Link> */}
               {/* <Link 
                 href="/sarkari-results" 
                 className="text-gray-700 hover:text-primary-600 font-medium transition-colors duration-200"

@@ -16,15 +16,15 @@ export default function Hero() {
     if (searchTerm.trim()) {
       // Set loading state
       setSearchLoading(true);
-      
+
       // Update URL with search parameter
       const url = new URL(window.location.href);
       url.searchParams.set('q', searchTerm.trim());
       window.history.pushState({}, '', url.toString());
-      
+
       // Trigger a custom event to notify JobGrid component
       window.dispatchEvent(new CustomEvent('searchUpdate'));
-      
+
       // Simulate a small delay to show the loading state
       setTimeout(() => {
         setSearchLoading(false);
@@ -51,16 +51,47 @@ export default function Hero() {
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 z-10">
           <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-700 text-balance drop-shadow-lg">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-700 text-balance drop-shadow-lg">
               Find Your Dream Job with{' '}
               <span className="text-[#8A00C4] drop-shadow-lg">AI-Powered</span> Insights
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-gray-700 max-w-3xl mx-auto text-balance drop-shadow">
-  🚀 Find the latest jobs & internships, analyze your CV instantly, and get smart career recommendations — all in one place.
-</p>
+              🚀 Find the latest jobs & internships, analyze your CV instantly, and get smart career recommendations — all in one place.
+            </p>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+            {/* <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search for jobs, companies, or skills..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-6 py-4 pl-12 text-black bg-white/80 backdrop-blur-md border border-[#8A00C4]/30 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-[#8A00C4] focus:ring-opacity-60 text-lg placeholder:text-gray-500"
+                />
+                {/* Left-side icon inside the input */}
+                {/* <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-[#8A00C4]" /> */}
+
+                {/* Right-side button with only icon */}
+                {/* <button */}
+                  {/* type="submit" */}
+                  {/* disabled={searchLoading} */}
+                  {/* className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#8A00C4] hover:bg-[#6a0099] text-white p-2 rounded-lg transition-colors duration-200 border border-[#8A00C4]/30 shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center" */}
+                {/* > */}
+                  {/* {searchLoading ? ( */}
+                    {/* <> */}
+                      {/* <LoadingSpinner size="sm" variant="white" className="mr-2" /> */}
+                      {/* <span>Searching...</span> */}
+                    {/* </> */}
+                  {/* ) : ( */}
+                    {/* <MagnifyingGlassIcon className="h-5 w-5 text-white" /> */}
+                  {/* )} */}
+                {/* </button> */}
+              {/* </div> */}
+            {/* </form> */} 
+
+
+            <form onSubmit={handleSearch} className="relative w-full max-w-2xl mx-auto mb-8">
   <div className="relative">
     <input
       type="text"
@@ -69,10 +100,28 @@ export default function Hero() {
       onChange={(e) => setSearchTerm(e.target.value)}
       className="w-full px-6 py-4 pl-12 text-black bg-white/80 backdrop-blur-md border border-[#8A00C4]/30 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-[#8A00C4] focus:ring-opacity-60 text-lg placeholder:text-gray-500"
     />
-    {/* Left-side icon inside the input */}
+
+    {/* Left-side search icon */}
     <MagnifyingGlassIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-[#8A00C4]" />
-    
-    {/* Right-side button with only icon */}
+
+    {/* Clear Button (only show when searchTerm is not empty) */}
+    {searchTerm && (
+      <button
+        type="button"
+        onClick={() => {
+          setSearchTerm('');
+          const url = new URL(window.location.href);
+          url.searchParams.delete('q');
+          window.history.pushState({}, '', url.toString());
+          window.dispatchEvent(new CustomEvent('searchUpdate'));
+        }}
+        className="absolute right-12 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 p-1 rounded-lg transition-colors duration-200 p-2"
+      >
+        Clear
+      </button>
+    )}
+
+    {/* Right-side submit button */}
     <button
       type="submit"
       disabled={searchLoading}
@@ -89,6 +138,11 @@ export default function Hero() {
     </button>
   </div>
 </form>
+
+
+
+
+
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button
@@ -129,9 +183,9 @@ export default function Hero() {
           </div>
         </div>
       </section>
-      <NewsletterModal 
-        isOpen={showNewsletter} 
-        onClose={() => setShowNewsletter(false)} 
+      <NewsletterModal
+        isOpen={showNewsletter}
+        onClose={() => setShowNewsletter(false)}
       />
     </>
   );
