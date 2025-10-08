@@ -6,7 +6,6 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import Pagination from '../components/Pagination';
 import { SarkariJob } from '../types';
 import axios from 'axios';
-import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -31,9 +30,19 @@ export default function GovernmentJobsClient() {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get(`https://api.india-jobs.in/api/v1/sarkari-jobs?page=${page}&limit=20`);
+      const response = await axios.get(
+        `https://api.india-jobs.in/api/v1/sarkari-jobs?page=${page}&limit=20`
+      );
       const data = response.data;
-      setJobs(data.jobs || []);
+
+      // ✅ Sort by createdAt (latest first)
+      const sortedJobs = (data.jobs || []).sort((a: SarkariJob, b: SarkariJob) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA; // latest first
+      });
+
+      setJobs(sortedJobs);
       setPagination(data.pagination || {
         currentPage: 1,
         totalPages: 1,
@@ -57,17 +66,15 @@ export default function GovernmentJobsClient() {
     fetchJobs(page);
   };
 
-  // Get unique organizations for filter dropdown
   const organizations = Array.from(new Set(jobs.map(j => j.organization).filter(Boolean)));
 
-  // Filter jobs based on selected organization and last date
   const filteredJobs = jobs.filter(job => {
     const orgMatch = !orgFilter || job.organization === orgFilter;
     let dateMatch = true;
     if (dateFilter) {
       const endDate = job.importantDates?.applicationEnd;
       if (!endDate) return false;
-      dateMatch = endDate >= dateFilter;
+      dateMatch = new Date(endDate).getTime() >= new Date(dateFilter).getTime();
     }
     return orgMatch && dateMatch;
   });
@@ -91,6 +98,8 @@ export default function GovernmentJobsClient() {
             </h1>
           </div>
         </div>
+
+        {/* Filters */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex gap-4 items-end flex-wrap">
             <div>
@@ -128,6 +137,7 @@ export default function GovernmentJobsClient() {
           </div>
         </div>
 
+        {/* Job Listing */}
         {loading ? (
           <LoadingSpinner />
         ) : error ? (
@@ -152,6 +162,8 @@ export default function GovernmentJobsClient() {
             ))}
           </div>
         )}
+
+        {/* Pagination */}
         {pagination.totalPages > 1 && (
           <Pagination
             currentPage={pagination.currentPage}

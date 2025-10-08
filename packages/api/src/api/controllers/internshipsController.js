@@ -205,6 +205,132 @@ exports.createInternship = async (req, res) => {
 };
 
 // Update internship
+// exports.updateInternship = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const updates = req.body;
+
+//     // First, find the internship to get the category (partition key)
+//     const scanParams = {
+//       TableName: TABLE_NAME,
+//       FilterExpression: 'id = :id',
+//       ExpressionAttributeValues: {
+//         ':id': id
+//       }
+//     };
+
+//     const scanCommand = new ScanCommand(scanParams);
+//     const scanResult = await docClient.send(scanCommand);
+
+//     if (!scanResult.Items || scanResult.Items.length === 0) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Internship not found'
+//       });
+//     }
+
+//     const existingInternship = scanResult.Items[0];
+//     const newCategory = updates.category;
+//     const oldCategory = existingInternship.category;
+
+//     // Check if category is being changed
+//     if (newCategory && newCategory !== oldCategory) {
+//       // Category is changing - we need to create a new item and delete the old one
+//       console.log(`Moving internship ${id} from category "${oldCategory}" to "${newCategory}"`);
+      
+//       // Get company logo if company is being updated
+//       let companyLogo = existingInternship.companyLogo;
+//       if (updates.company && updates.company !== existingInternship.company) {
+//         companyLogo = await getCompanyLogo(updates.company);
+//       }
+
+//       // Create new item with updated category
+//       const newInternshipData = {
+//         ...existingInternship,
+//         ...updates,
+//         category: newCategory,
+//         companyLogo,
+//         lastUpdated: new Date().toISOString()
+//       };
+
+//       // Put the new item
+//       const putParams = {
+//         TableName: TABLE_NAME,
+//         Item: newInternshipData
+//       };
+//       const putCommand = new PutCommand(putParams);
+//       await docClient.send(putCommand);
+
+//       // Delete the old item
+//       const deleteParams = {
+//         TableName: TABLE_NAME,
+//         Key: {
+//           category: oldCategory,
+//           id: id
+//         }
+//       };
+//       const deleteCommand = new DeleteCommand(deleteParams);
+//       await docClient.send(deleteCommand);
+
+//       res.json({
+//         success: true,
+//         message: `Internship updated successfully and moved from "${oldCategory}" to "${newCategory}"`,
+//         internship: newInternshipData
+//       });
+//     } else {
+//       // Category is not changing - do normal update
+//       let updateExpression = 'SET ';
+//       const expressionAttributeNames = {};
+//       const expressionAttributeValues = {};
+      
+//       Object.keys(updates).forEach((key, index) => {
+//         if (key !== 'id' && key !== 'category') { // Don't update keys
+//           let value = updates[key];
+//           if (key === 'batch') {
+//             value = Array.isArray(value) ? value : (value ? value.split(',').map(b => b.trim()) : []);
+//           }
+//           updateExpression += `#${key} = :${key}`;
+//           if (index < Object.keys(updates).length - 1) updateExpression += ', ';
+//           expressionAttributeNames[`#${key}`] = key;
+//           expressionAttributeValues[`:${key}`] = value;
+//         }
+//       });
+
+//       // Add lastUpdated
+//       updateExpression += ', lastUpdated = :lastUpdated';
+//       expressionAttributeValues[':lastUpdated'] = new Date().toISOString();
+
+//       const params = {
+//         TableName: TABLE_NAME,
+//         Key: {
+//           category: existingInternship.category,
+//           id: id
+//         },
+//         UpdateExpression: updateExpression,
+//         ExpressionAttributeNames: expressionAttributeNames,
+//         ExpressionAttributeValues: expressionAttributeValues,
+//         ReturnValues: 'ALL_NEW'
+//       };
+
+//       const command = new UpdateCommand(params);
+//       const result = await docClient.send(command);
+
+//       res.json({
+//         success: true,
+//         message: 'Internship updated successfully',
+//         internship: result.Attributes
+//       });
+//     }
+//   } catch (error) {
+//     console.error('Error updating internship:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to update internship',
+//       error: error.message
+//     });
+//   }
+// };
+
 exports.updateInternship = async (req, res) => {
   try {
     const { id } = req.params;
@@ -235,13 +361,14 @@ exports.updateInternship = async (req, res) => {
 
     // Check if category is being changed
     if (newCategory && newCategory !== oldCategory) {
-      // Category is changing - we need to create a new item and delete the old one
       console.log(`Moving internship ${id} from category "${oldCategory}" to "${newCategory}"`);
-      
-      // Get company logo if company is being updated
+
+      // Determine final company logo
       let companyLogo = existingInternship.companyLogo;
-      if (updates.company && updates.company !== existingInternship.company) {
-        companyLogo = await getCompanyLogo(updates.company);
+      if (updates.companyLogo) {
+        companyLogo = updates.companyLogo; // manual override
+      } else if (updates.company && updates.company !== existingInternship.company) {
+        companyLogo = await getCompanyLogo(updates.company); // fallback to Clearbit
       }
 
       // Create new item with updated category
@@ -272,55 +399,57 @@ exports.updateInternship = async (req, res) => {
       const deleteCommand = new DeleteCommand(deleteParams);
       await docClient.send(deleteCommand);
 
-      res.json({
+      return res.json({
         success: true,
         message: `Internship updated successfully and moved from "${oldCategory}" to "${newCategory}"`,
         internship: newInternshipData
       });
-    } else {
-      // Category is not changing - do normal update
-      let updateExpression = 'SET ';
-      const expressionAttributeNames = {};
-      const expressionAttributeValues = {};
-      
-      Object.keys(updates).forEach((key, index) => {
-        if (key !== 'id' && key !== 'category') { // Don't update keys
-          let value = updates[key];
-          if (key === 'batch') {
-            value = Array.isArray(value) ? value : (value ? value.split(',').map(b => b.trim()) : []);
-          }
-          updateExpression += `#${key} = :${key}`;
-          if (index < Object.keys(updates).length - 1) updateExpression += ', ';
-          expressionAttributeNames[`#${key}`] = key;
-          expressionAttributeValues[`:${key}`] = value;
-        }
-      });
-
-      // Add lastUpdated
-      updateExpression += ', lastUpdated = :lastUpdated';
-      expressionAttributeValues[':lastUpdated'] = new Date().toISOString();
-
-      const params = {
-        TableName: TABLE_NAME,
-        Key: {
-          category: existingInternship.category,
-          id: id
-        },
-        UpdateExpression: updateExpression,
-        ExpressionAttributeNames: expressionAttributeNames,
-        ExpressionAttributeValues: expressionAttributeValues,
-        ReturnValues: 'ALL_NEW'
-      };
-
-      const command = new UpdateCommand(params);
-      const result = await docClient.send(command);
-
-      res.json({
-        success: true,
-        message: 'Internship updated successfully',
-        internship: result.Attributes
-      });
     }
+
+    // Category is not changing - normal update
+    let updateExpression = 'SET ';
+    const expressionAttributeNames = {};
+    const expressionAttributeValues = {};
+
+    Object.keys(updates).forEach((key, index) => {
+      if (key !== 'id' && key !== 'category') { // Don't update keys
+        let value = updates[key];
+        if (key === 'batch') {
+          value = Array.isArray(value)
+            ? value
+            : (value ? value.split(',').map(b => b.trim()) : []);
+        }
+        updateExpression += `#${key} = :${key}`;
+        if (index < Object.keys(updates).length - 1) updateExpression += ', ';
+        expressionAttributeNames[`#${key}`] = key;
+        expressionAttributeValues[`:${key}`] = value;
+      }
+    });
+
+    // Add lastUpdated timestamp
+    updateExpression += ', lastUpdated = :lastUpdated';
+    expressionAttributeValues[':lastUpdated'] = new Date().toISOString();
+
+    const params = {
+      TableName: TABLE_NAME,
+      Key: {
+        category: existingInternship.category,
+        id: id
+      },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW'
+    };
+
+    const command = new UpdateCommand(params);
+    const result = await docClient.send(command);
+
+    res.json({
+      success: true,
+      message: 'Internship updated successfully',
+      internship: result.Attributes
+    });
   } catch (error) {
     console.error('Error updating internship:', error);
     res.status(500).json({
@@ -330,6 +459,7 @@ exports.updateInternship = async (req, res) => {
     });
   }
 };
+
 
 // Delete internship
 exports.deleteInternship = async (req, res) => {
